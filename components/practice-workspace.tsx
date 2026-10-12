@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/dailyLesson";
 import type { DailyLesson } from "@/lib/daily/lesson";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatMessage, type Messages } from "@/lib/i18n/config";
 
@@ -49,7 +50,7 @@ export function PracticeWorkspace({
 
   if (!lesson) {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <Card className="p-5 sm:p-6">
         <div className="max-w-xl space-y-3">
           <p className="text-sm font-medium text-muted-foreground">
             {formatMessage(messages.practice.minutePractice, {
@@ -72,13 +73,13 @@ export function PracticeWorkspace({
               : messages.practice.generateButton}
           </Button>
         </form>
-      </div>
+      </Card>
     );
   }
 
   if (lesson.generation_status === "pending") {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <Card className="p-5 sm:p-6">
         <h1 className="text-2xl font-semibold">
           {messages.practice.pendingTitle}
         </h1>
@@ -86,13 +87,13 @@ export function PracticeWorkspace({
           {messages.practice.pendingBody}
         </p>
         {error ? <StatusMessage tone="error" message={error} /> : null}
-      </div>
+      </Card>
     );
   }
 
   if (lesson.generation_status === "failed") {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <Card className="p-5 sm:p-6">
         <h1 className="text-2xl font-semibold">
           {messages.practice.failedTitle}
         </h1>
@@ -108,13 +109,13 @@ export function PracticeWorkspace({
               : messages.practice.retryButton}
           </Button>
         </form>
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-5">
-      <div className="rounded-lg border bg-card p-5">
+      <Card className="p-4 sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
@@ -135,13 +136,13 @@ export function PracticeWorkspace({
           ) : null}
         </div>
 
-        <div className="mt-5 grid grid-cols-4 gap-2">
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {messages.practice.sections.map((item, index) => (
             <button
               key={item}
               type="button"
               className={cn(
-                "h-10 rounded-md border text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-foreground",
+                "min-h-11 rounded-xl border px-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-foreground",
                 index === step && "border-primary bg-accent text-accent-foreground",
               )}
               onClick={() => setStep(index)}
@@ -202,17 +203,17 @@ export function PracticeWorkspace({
             )}
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
 
 function Vocabulary({ lesson }: { lesson: DailyLesson }) {
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       {lesson.words.map((item) => (
-        <div key={item.word} className="rounded-md border bg-background p-4">
-          <h2 className="font-semibold">{item.word}</h2>
+        <div key={item.word} className="rounded-xl border bg-background p-4">
+          <h2 className="text-lg font-semibold">{item.word}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{item.meaning}</p>
           <p className="mt-3 text-sm">{item.example}</p>
         </div>
@@ -229,8 +230,8 @@ function Sentence({
   messages: Messages;
 }) {
   return (
-    <div className="rounded-md border bg-background p-5">
-      <p className="text-xl font-medium leading-relaxed">{lesson.sentence}</p>
+    <div className="rounded-xl border bg-background p-5">
+      <p className="text-2xl font-semibold leading-relaxed">{lesson.sentence}</p>
       <p className="mt-4 text-sm text-muted-foreground">
         {messages.practice.sentenceHint}
       </p>
@@ -240,8 +241,8 @@ function Sentence({
 
 function Reading({ lesson }: { lesson: DailyLesson }) {
   return (
-    <article className="rounded-md border bg-background p-5">
-      <p className="whitespace-pre-line leading-7">{lesson.reading_text}</p>
+    <article className="rounded-xl border bg-background p-5">
+      <p className="whitespace-pre-line text-base leading-8">{lesson.reading_text}</p>
     </article>
   );
 }
@@ -254,8 +255,8 @@ function Speaking({
   messages: Messages;
 }) {
   return (
-    <div className="rounded-md border bg-background p-5">
-      <p className="text-lg leading-7">{lesson.speaking_task}</p>
+    <div className="rounded-xl border bg-background p-5">
+      <p className="text-xl font-medium leading-8">{lesson.speaking_task}</p>
       <p className="mt-4 text-sm text-muted-foreground">
         {messages.practice.speakingHint}
       </p>

@@ -50,7 +50,7 @@ export default async function RootLayout({
         <ThemeProvider initialPreference={themePreference}>
           <div className="min-h-screen">
             <AppNav />
-            <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+            <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 md:pb-8 md:pt-8 lg:px-8">
               {children}
             </main>
           </div>

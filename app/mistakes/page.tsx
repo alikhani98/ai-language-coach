@@ -2,6 +2,7 @@ import { requireProfile } from "@/lib/actions/profile";
 import { getMistakeNotebook } from "@/lib/actions/mistakes";
 import { MistakeNotebook } from "@/components/mistake-notebook";
 import { getMessages } from "@/lib/i18n/config";
+import { PageHeader } from "@/components/ui/page-header";
 
 type MistakesPageProps = {
   searchParams: Promise<{
@@ -17,23 +18,17 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
 
   return (
     <section className="space-y-6">
-      <div className="max-w-2xl space-y-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          {messages.mistakes.eyebrow}
-        </p>
-        <h1 className="text-3xl font-semibold tracking-normal">
-          {messages.mistakes.heading}
-        </h1>
-        <p className="text-muted-foreground">
-          {messages.mistakes.body}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={messages.mistakes.eyebrow}
+        title={messages.mistakes.heading}
+        description={messages.mistakes.body}
+      />
 
       {notebook.categories.length ? (
         <div className="flex flex-wrap gap-2">
           <a
             href="/mistakes"
-            className="rounded-md border bg-background px-3 py-2 text-sm"
+            className="rounded-xl border bg-background px-3 py-2 text-sm"
           >
             {messages.mistakes.all}
           </a>
@@ -41,7 +36,7 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
             <a
               key={category}
               href={`/mistakes?category=${encodeURIComponent(category)}`}
-              className="rounded-md border bg-background px-3 py-2 text-sm"
+              className="rounded-xl border bg-background px-3 py-2 text-sm"
             >
               {category}
             </a>

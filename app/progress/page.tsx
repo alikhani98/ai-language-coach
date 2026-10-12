@@ -1,6 +1,8 @@
 import { requireProfile } from "@/lib/actions/profile";
 import { getProgressData } from "@/lib/actions/progress";
 import { getMessages } from "@/lib/i18n/config";
+import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default async function ProgressPage() {
   const profile = await requireProfile();
@@ -9,17 +11,11 @@ export default async function ProgressPage() {
 
   return (
     <section className="space-y-6">
-      <div className="max-w-2xl space-y-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          {messages.progress.eyebrow}
-        </p>
-        <h1 className="text-3xl font-semibold tracking-normal">
-          {messages.progress.heading}
-        </h1>
-        <p className="text-muted-foreground">
-          {messages.progress.body}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={messages.progress.eyebrow}
+        title={messages.progress.heading}
+        description={messages.progress.body}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Metric
@@ -41,14 +37,14 @@ export default async function ProgressPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-lg border bg-card p-5">
+        <Card className="p-5">
           <h2 className="font-semibold">{messages.progress.topics}</h2>
           <div className="mt-4 space-y-3">
             {progress.topicCounts.length ? (
               progress.topicCounts.map((topic) => (
                 <div
                   key={topic.topic}
-                  className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-xl border bg-background px-3 py-2 text-sm"
                 >
                   <span>{topic.topic.replaceAll("_", " ")}</span>
                   <span className="text-muted-foreground">
@@ -65,16 +61,16 @@ export default async function ProgressPage() {
               </p>
             )}
           </div>
-        </section>
+        </Card>
 
-        <section className="rounded-lg border bg-card p-5">
+        <Card className="p-5">
           <h2 className="font-semibold">{messages.progress.weakAreas}</h2>
           <div className="mt-4 space-y-3">
             {progress.weakAreas.length ? (
               progress.weakAreas.map((area) => (
                 <div
                   key={area.category}
-                  className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-xl border bg-background px-3 py-2 text-sm"
                 >
                   <span>{area.category}</span>
                   <span className="text-muted-foreground">
@@ -91,17 +87,17 @@ export default async function ProgressPage() {
               </p>
             )}
           </div>
-        </section>
+        </Card>
       </div>
 
-      <section className="rounded-lg border bg-card p-5">
+      <Card className="p-5">
         <h2 className="font-semibold">{messages.progress.recent}</h2>
         <div className="mt-4 space-y-3">
           {progress.recentActivity.length ? (
             progress.recentActivity.map((activity) => (
               <div
                 key={activity.id}
-                className="flex flex-col gap-1 rounded-md border bg-background px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-1 rounded-xl border bg-background px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
               >
                 <span>
                   {activity.type === "daily_lesson"
@@ -119,16 +115,16 @@ export default async function ProgressPage() {
             </p>
           )}
         </div>
-      </section>
+      </Card>
     </section>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border bg-card p-5">
+    <Card className="p-5">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+    </Card>
   );
 }

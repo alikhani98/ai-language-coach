@@ -5,6 +5,7 @@ import {
 } from "@/lib/actions/conversation";
 import { ConversationWorkspace } from "@/components/conversation-workspace";
 import { getMessages } from "@/lib/i18n/config";
+import { PageHeader } from "@/components/ui/page-header";
 
 type ConversationPageProps = {
   searchParams: Promise<{
@@ -25,17 +26,11 @@ export default async function ConversationPage({
 
   return (
     <section className="space-y-6">
-      <div className="max-w-2xl space-y-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          {messages.conversation.eyebrow}
-        </p>
-        <h1 className="text-3xl font-semibold tracking-normal">
-          {messages.conversation.heading}
-        </h1>
-        <p className="text-muted-foreground">
-          {messages.conversation.body}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={messages.conversation.eyebrow}
+        title={messages.conversation.heading}
+        description={messages.conversation.body}
+      />
       <ConversationWorkspace
         initialThread={initialThread}
         recentConversations={recentConversations}

@@ -4,6 +4,7 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { createProfile } from "@/lib/actions/profile";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { ProfileInput } from "@/lib/validations/profile";
 import { getMessages, type InterfaceLanguage } from "@/lib/i18n/config";
@@ -93,7 +94,7 @@ export function OnboardingForm() {
   }, [messages, step]);
 
   return (
-    <div className="mx-auto max-w-2xl rounded-lg border bg-card p-5 sm:p-6">
+    <Card className="mx-auto max-w-2xl p-5 sm:p-6">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
           {messages.onboarding.step
@@ -101,7 +102,7 @@ export function OnboardingForm() {
             .replace("{total}", String(steps.length))}
         </p>
         <h1 className="text-2xl font-semibold">{title}</h1>
-        <div className="grid grid-cols-3 gap-2 pt-2">
+        <div className="grid grid-cols-4 gap-2 pt-2">
           {steps.map((label, index) => (
             <div key={label} className="space-y-2">
               <div
@@ -191,7 +192,7 @@ export function OnboardingForm() {
           )}
         </div>
       </form>
-    </div>
+    </Card>
   );
 }
 
@@ -216,7 +217,7 @@ function OptionGrid<T extends string | number>({
             key={option.value}
             type="button"
             className={cn(
-              "flex min-h-16 items-center justify-between gap-3 rounded-md border bg-background p-4 text-left transition-colors hover:border-primary",
+              "flex min-h-16 items-center justify-between gap-3 rounded-xl border bg-background p-4 text-left transition-colors hover:border-primary",
               selected && "border-primary bg-accent",
             )}
             onClick={() => onChange(option.value)}

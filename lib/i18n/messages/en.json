@@ -116,6 +116,8 @@
     "eyebrow": "Ready for your {minutes} minute English practice?",
     "heading": "Your focused English practice is ready.",
     "body": "A calm plan with vocabulary, one useful sentence, short input, and a speaking prompt.",
+    "greeting": "Good morning {name}",
+    "quickActions": "Quick actions",
     "todaysPractice": "Today's practice",
     "openPractice": "Open practice",
     "generatePractice": "Generate practice",
@@ -173,6 +175,7 @@
     "replyPlaceholder": "Write your reply in English...",
     "send": "Send",
     "sending": "Sending",
+    "typing": "Coach is thinking...",
     "original": "Original:",
     "better": "Better:",
     "topics": {

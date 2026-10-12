@@ -18,6 +18,8 @@ import {
   type ConversationTopic,
 } from "@/lib/validations/conversation";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import type { Messages } from "@/lib/i18n/config";
 
@@ -67,9 +69,9 @@ export function ConversationWorkspace({
   );
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.8fr_1.4fr]">
+    <div className="grid gap-5 lg:grid-cols-[0.8fr_1.4fr]">
       <aside className="space-y-5">
-        <section className="rounded-lg border bg-card p-5">
+        <Card className="p-5">
           <h2 className="font-semibold">{ui.conversation.start}</h2>
           <form action={startAction} className="mt-4 space-y-4">
             <input type="hidden" name="topic" value={topic} />
@@ -79,7 +81,7 @@ export function ConversationWorkspace({
                   key={item}
                   type="button"
                   className={cn(
-                    "flex min-h-11 items-center justify-between rounded-md border bg-background px-3 py-2 text-left text-sm font-medium transition-colors hover:border-primary",
+                    "flex min-h-12 items-center justify-between rounded-xl border bg-background px-3 py-2 text-left text-sm font-medium transition-colors hover:border-primary",
                     topic === item && "border-primary bg-accent",
                   )}
                   onClick={() => setTopic(item)}
@@ -96,9 +98,9 @@ export function ConversationWorkspace({
                 : ui.conversation.startButton}
             </Button>
           </form>
-        </section>
+        </Card>
 
-        <section className="rounded-lg border bg-card p-5">
+        <Card className="p-5">
           <h2 className="font-semibold">{ui.conversation.recent}</h2>
           <div className="mt-4 space-y-2">
             {recentConversations.length ? (
@@ -107,7 +109,7 @@ export function ConversationWorkspace({
                   key={conversation.id}
                   href={`/conversation?id=${conversation.id}`}
                   className={cn(
-                    "block rounded-md border bg-background px-3 py-2 text-sm transition-colors hover:border-primary",
+                    "block rounded-xl border bg-background px-3 py-2 text-sm transition-colors hover:border-primary",
                     thread?.conversation.id === conversation.id &&
                       "border-primary bg-accent",
                   )}
@@ -128,10 +130,10 @@ export function ConversationWorkspace({
               </p>
             )}
           </div>
-        </section>
+        </Card>
       </aside>
 
-      <section className="rounded-lg border bg-card p-5">
+      <Card className="p-4 sm:p-5">
         {thread ? (
           <ConversationPanel
             thread={thread}
@@ -149,19 +151,16 @@ export function ConversationWorkspace({
             messages={ui}
           />
         ) : (
-          <div className="flex min-h-96 items-center justify-center text-center">
-            <div className="max-w-sm space-y-3">
-              <MessageCircle className="mx-auto h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold">
-                {ui.conversation.emptyTitle}
-              </h1>
-              <p className="text-muted-foreground">
-                {ui.conversation.emptyBody}
-              </p>
-            </div>
+          <div className="flex min-h-96 items-center justify-center">
+            <EmptyState
+              icon={MessageCircle}
+              title={ui.conversation.emptyTitle}
+              description={ui.conversation.emptyBody}
+              className="max-w-sm"
+            />
           </div>
         )}
-      </section>
+      </Card>
     </div>
   );
 }
@@ -229,7 +228,7 @@ function ConversationPanel({
         </form>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto py-5">
+      <div className="max-h-[58vh] flex-1 space-y-4 overflow-y-auto py-5 pr-1 rtl:pl-1 rtl:pr-0">
         {threadMessages.length ? (
           threadMessages.map((message) => (
             <MessageBubble
@@ -239,10 +238,17 @@ function ConversationPanel({
             />
           ))
         ) : (
-          <div className="rounded-md border bg-background p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border bg-background p-4 text-sm text-muted-foreground">
             {messages.conversation.sendHint}
           </div>
         )}
+        {isSending ? (
+          <div className="flex justify-start">
+            <div className="rounded-2xl rounded-bl-md border bg-background px-4 py-3 text-sm text-muted-foreground shadow-sm rtl:rounded-bl-2xl rtl:rounded-br-md">
+              {messages.conversation.typing}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {success ? <StatusMessage tone="success" message={success} /> : null}
@@ -262,7 +268,7 @@ function ConversationPanel({
           disabled={isEnded || isSending}
           maxLength={800}
           rows={3}
-          className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full resize-none rounded-xl border border-input bg-background px-4 py-3 text-base outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
           placeholder={
             isEnded
               ? messages.conversation.endedPlaceholder
@@ -294,8 +300,10 @@ function MessageBubble({
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[85%] rounded-lg border p-4",
-          isUser ? "bg-primary text-primary-foreground" : "bg-background",
+          "max-w-[88%] rounded-2xl border p-4 shadow-sm",
+          isUser
+            ? "rounded-br-md bg-primary text-primary-foreground rtl:rounded-bl-md rtl:rounded-br-2xl"
+            : "rounded-bl-md bg-background rtl:rounded-bl-2xl rtl:rounded-br-md",
         )}
       >
         <p className="whitespace-pre-line text-sm leading-6">{message.content}</p>
@@ -304,7 +312,7 @@ function MessageBubble({
             {message.corrections.map((correction) => (
               <div
                 key={`${correction.original}-${correction.corrected}`}
-                className="rounded-md border bg-card p-3 text-sm"
+                className="rounded-xl border bg-card p-3 text-sm"
               >
                 <p>
                   <span className="text-muted-foreground">

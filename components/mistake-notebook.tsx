@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/mistakes";
 import type { Mistake, MistakeGroup } from "@/lib/mistakes/model";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { Messages } from "@/lib/i18n/config";
 
 type MistakeNotebookProps = {
@@ -29,7 +30,7 @@ export function MistakeNotebook({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 rounded-lg border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-semibold">
             {messages.mistakes.conversationCorrections}
@@ -44,7 +45,7 @@ export function MistakeNotebook({
             {isSyncing ? messages.common.syncing : messages.mistakes.sync}
           </Button>
         </form>
-      </div>
+      </Card>
 
       {syncState.success ? (
         <StatusMessage tone="success" message={syncState.success} />
@@ -59,12 +60,12 @@ export function MistakeNotebook({
         <StatusMessage tone="error" message={removeState.error} />
       ) : null}
 
-      <section className="rounded-lg border bg-card p-5">
+      <Card className="p-5">
         <h2 className="font-semibold">{messages.mistakes.frequent}</h2>
         <div className="mt-4 grid gap-3">
           {groups.length ? (
             groups.slice(0, 6).map((group) => (
-              <div key={group.key} className="rounded-md border bg-background p-4">
+              <div key={group.key} className="rounded-xl border bg-background p-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-medium">{group.category}</p>
                   <span className="text-sm text-muted-foreground">
@@ -94,16 +95,16 @@ export function MistakeNotebook({
             </p>
           )}
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-lg border bg-card p-5">
+      <Card className="p-5">
         <h2 className="font-semibold">{messages.mistakes.notebookEntries}</h2>
         <div className="mt-4 space-y-3">
           {mistakes.length ? (
             mistakes.map((mistake) => (
               <article
                 key={mistake.id}
-                className="rounded-md border bg-background p-4"
+                className="rounded-xl border bg-background p-4"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-2">
@@ -152,7 +153,7 @@ export function MistakeNotebook({
             </p>
           )}
         </div>
-      </section>
+      </Card>
     </div>
   );
 }
