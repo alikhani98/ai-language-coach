@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { interfaceLanguages } from "@/lib/i18n/config";
+import { themePreferences } from "@/lib/theme/config";
 
 export const profileLevels = [
   "a1_beginner",
@@ -15,6 +17,9 @@ export const profileGoals = [
   "exam",
   "personal_growth",
 ] as const;
+
+export const interfaceLanguageSchema = z.enum(interfaceLanguages).default("en");
+export const themePreferenceSchema = z.enum(themePreferences).default("system");
 
 export function isValidTimeZone(timezone: string) {
   try {
@@ -39,6 +44,8 @@ export const profileSchema = z.object({
     .min(1)
     .default("UTC")
     .refine(isValidTimeZone, "Choose a valid timezone."),
+  interface_language: interfaceLanguageSchema,
+  theme_preference: themePreferenceSchema,
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

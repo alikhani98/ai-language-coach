@@ -16,6 +16,7 @@ import {
   type ConversationThread,
 } from "@/lib/conversation/model";
 import { createClient } from "@/lib/supabase/server";
+import { getMessages } from "@/lib/i18n/config";
 import {
   conversationIdSchema,
   conversationMessageInputSchema,
@@ -199,10 +200,11 @@ export async function startConversation(
 ): Promise<ConversationActionState> {
   void previousState;
   const profile = await requireProfile();
+  const messages = getMessages(profile.interface_language);
   const parsed = conversationTopicSchema.safeParse(parseFormString(formData, "topic"));
 
   if (!parsed.success) {
-    return { error: "Choose a conversation topic." };
+    return { error: messages.actions.conversationChooseTopic };
   }
 
   const supabase = await createClient();
@@ -229,7 +231,7 @@ export async function startConversation(
   return {
     conversationId: conversation.id,
     thread: { conversation, messages: [] },
-    success: "Conversation started.",
+    success: messages.actions.conversationStarted,
   };
 }
 
@@ -251,9 +253,10 @@ export async function sendConversationMessage(
   const { profile, thread } = await getConversationContext(
     parsed.data.conversationId,
   );
+  const messages = getMessages(profile.interface_language);
 
   if (thread.conversation.status === "ended") {
-    return { thread, error: "This conversation has ended." };
+    return { thread, error: messages.actions.conversationEnded };
   }
 
   const duplicateUserMessage = isDuplicateRequest(
@@ -267,7 +270,7 @@ export async function sendConversationMessage(
   ) {
     return {
       thread,
-      success: "This message was already answered.",
+      success: messages.actions.conversationAlreadyAnswered,
     };
   }
 
@@ -277,14 +280,14 @@ export async function sendConversationMessage(
   ) {
     return {
       thread,
-      error: "This message is already being answered.",
+      error: messages.actions.conversationAnswering,
     };
   }
 
   if (!duplicateUserMessage && thread.messages.length >= maxMessagesPerConversation) {
     return {
       thread,
-      error: "This conversation is full. Start a new one to continue.",
+      error: messages.actions.conversationFull,
     };
   }
 
@@ -294,7 +297,7 @@ export async function sendConversationMessage(
     if (recentCount >= maxUserMessagesPerMinute) {
       return {
         thread,
-        error: "Please slow down for a moment before sending another message.",
+        error: messages.actions.conversationSlowDown,
       };
     }
   }
@@ -308,7 +311,7 @@ export async function sendConversationMessage(
     return {
       thread,
       error:
-        "The coach is still answering the previous message. Try again in a moment.",
+        messages.actions.conversationPreviousAnswering,
     };
   }
 
@@ -341,6 +344,7 @@ export async function sendConversationMessage(
       profile: {
         level: profile.level,
         goal: profile.goal,
+        interfaceLanguage: profile.interface_language,
       },
       topic: thread.conversation.topic,
       recentMessages: contextMessages,
@@ -373,7 +377,7 @@ export async function sendConversationMessage(
 
     return {
       thread: await fetchThread(profile.user_id, thread.conversation.id),
-      success: "Coach replied.",
+      success: messages.actions.conversationReplied,
     };
   } catch (error) {
     await releaseGeneration(thread.conversation, parsed.data.requestId);
@@ -383,7 +387,7 @@ export async function sendConversationMessage(
       error:
         error instanceof Error
           ? error.message
-          : "The coach could not answer. Try again.",
+          : messages.actions.conversationReplyFailed,
     };
   }
 }
@@ -402,10 +406,11 @@ export async function endConversation(
   }
 
   const { profile, thread } = await getConversationContext(parsed.data);
+  const messages = getMessages(profile.interface_language);
   const supabase = await createClient();
 
   if (thread.conversation.status === "ended") {
-    return { thread, success: "Conversation already ended." };
+    return { thread, success: messages.actions.conversationAlreadyEnded };
   }
 
   const endedAt = nowIso();
@@ -434,6 +439,6 @@ export async function endConversation(
       conversation: mapConversationRow(data),
       messages: thread.messages,
     },
-    success: "Conversation ended.",
+    success: messages.actions.conversationEndSuccess,
   };
 }

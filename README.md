@@ -11,6 +11,8 @@ A small AI-powered daily English coach focused on 10-15 minutes of consistent pr
 - Supabase Auth and PostgreSQL
 - Zod validation
 - Provider-based AI service layer with OpenRouter primary support
+- Bilingual UI support for English and Persian
+- Light, dark, system, and time-based auto theme support
 
 ## Project Structure
 
@@ -18,6 +20,7 @@ A small AI-powered daily English coach focused on 10-15 minutes of consistent pr
 - `components/` - shared UI and app components
 - `lib/actions/` - server actions
 - `lib/ai/` - AI service layer
+- `lib/i18n/` - UI language config and message catalogs
 - `lib/supabase/` - Supabase clients
 - `lib/validations/` - Zod schemas
 - `types/` - shared TypeScript types
@@ -80,6 +83,37 @@ LOCAL_AI_BASE_URL=
 OpenRouter is the default production provider. The local provider is optional and is intended for OpenAI-compatible local endpoints. No paid OpenAI API key or OpenAI SDK is required.
 
 Do not expose `SUPABASE_SERVICE_ROLE_KEY` or `OPENROUTER_API_KEY` in client components, browser bundles, logs, or public documentation examples.
+
+## UI Languages
+
+The application interface supports:
+
+- English (`en`)
+- Persian (`fa`)
+
+The UI language is stored on `users_profile.interface_language`. Authenticated users can change it from the navigation language selector. The explicit profile value is the source of truth; if no profile language is available, the app falls back to English.
+
+The learning language remains English. Lessons, vocabulary examples, target sentences, and user conversation text should stay in English. For Persian UI users, AI correction explanations may be Persian while corrected English sentences remain English.
+
+Translations live in:
+
+```text
+lib/i18n/messages/en.json
+lib/i18n/messages/fa.json
+```
+
+To add or change translated UI text, update both message files with the same key structure and use helpers from `lib/i18n/config.ts`. Avoid translating user-generated text or AI-generated English learning content.
+
+## Theme Preferences
+
+The app supports these theme modes:
+
+- `light`: always use the light theme.
+- `dark`: always use the dark theme.
+- `system`: follow the operating system color scheme.
+- `auto`: use browser-local time, light from 06:00 to 18:00 and dark from 18:00 to 06:00.
+
+Authenticated users store their choice in `users_profile.theme_preference`. Visitors who are not signed in use a `localStorage` fallback. After login, the database profile preference is authoritative.
 
 ## Production Validation
 

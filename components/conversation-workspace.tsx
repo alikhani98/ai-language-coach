@@ -19,23 +19,18 @@ import {
 } from "@/lib/validations/conversation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { Messages } from "@/lib/i18n/config";
 
 type ConversationWorkspaceProps = {
   initialThread: ConversationThread | null;
   recentConversations: Conversation[];
-};
-
-const topicLabels: Record<ConversationTopic, string> = {
-  daily_life: "Daily Life",
-  work: "Work",
-  travel: "Travel",
-  hobbies: "Hobbies",
-  free_conversation: "Free Conversation",
+  messages: Messages;
 };
 
 export function ConversationWorkspace({
   initialThread,
   recentConversations,
+  messages: ui,
 }: ConversationWorkspaceProps) {
   const [topic, setTopic] = useState<ConversationTopic>("daily_life");
   const [text, setText] = useState("");
@@ -54,7 +49,7 @@ export function ConversationWorkspace({
 
   const thread =
     endState.thread ?? sendState.thread ?? startState.thread ?? initialThread;
-  const messages = thread?.messages ?? [];
+  const threadMessages = thread?.messages ?? [];
   const error = endState.error ?? sendState.error ?? startState.error;
   const success = endState.success ?? sendState.success ?? startState.success;
   const isEnded = thread?.conversation.status === "ended";
@@ -75,7 +70,7 @@ export function ConversationWorkspace({
     <div className="grid gap-6 lg:grid-cols-[0.8fr_1.4fr]">
       <aside className="space-y-5">
         <section className="rounded-lg border bg-card p-5">
-          <h2 className="font-semibold">Start a conversation</h2>
+          <h2 className="font-semibold">{ui.conversation.start}</h2>
           <form action={startAction} className="mt-4 space-y-4">
             <input type="hidden" name="topic" value={topic} />
             <div className="grid gap-2">
@@ -89,20 +84,22 @@ export function ConversationWorkspace({
                   )}
                   onClick={() => setTopic(item)}
                 >
-                  {topicLabels[item]}
+                  {ui.conversation.topics[item]}
                   {topic === item ? <Check className="h-4 w-4" /> : null}
                 </button>
               ))}
             </div>
             <Button type="submit" className="w-full" disabled={isStarting}>
               <MessageCircle className="mr-2 h-4 w-4" />
-              {isStarting ? "Starting" : "Start conversation"}
+              {isStarting
+                ? ui.conversation.starting
+                : ui.conversation.startButton}
             </Button>
           </form>
         </section>
 
         <section className="rounded-lg border bg-card p-5">
-          <h2 className="font-semibold">Recent conversations</h2>
+          <h2 className="font-semibold">{ui.conversation.recent}</h2>
           <div className="mt-4 space-y-2">
             {recentConversations.length ? (
               recentConversations.map((conversation) => (
@@ -116,16 +113,18 @@ export function ConversationWorkspace({
                   )}
                 >
                   <span className="font-medium">
-                    {topicLabels[conversation.topic]}
+                    {ui.conversation.topics[conversation.topic]}
                   </span>
                   <span className="mt-1 block text-xs text-muted-foreground">
-                    {conversation.status === "ended" ? "Ended" : "Active"}
+                    {conversation.status === "ended"
+                      ? ui.conversation.ended
+                      : ui.conversation.active}
                   </span>
                 </Link>
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                No conversations yet.
+                {ui.conversation.noRecent}
               </p>
             )}
           </div>
@@ -136,7 +135,7 @@ export function ConversationWorkspace({
         {thread ? (
           <ConversationPanel
             thread={thread}
-            messages={messages}
+            threadMessages={threadMessages}
             text={text}
             setText={setText}
             requestId={requestId}
@@ -147,17 +146,17 @@ export function ConversationWorkspace({
             isEnding={isEnding}
             error={error}
             success={success}
+            messages={ui}
           />
         ) : (
           <div className="flex min-h-96 items-center justify-center text-center">
             <div className="max-w-sm space-y-3">
               <MessageCircle className="mx-auto h-8 w-8 text-primary" />
               <h1 className="text-2xl font-semibold">
-                Choose a topic to begin.
+                {ui.conversation.emptyTitle}
               </h1>
               <p className="text-muted-foreground">
-                The coach will ask one question at a time and give small,
-                useful corrections when needed.
+                {ui.conversation.emptyBody}
               </p>
             </div>
           </div>
@@ -169,7 +168,7 @@ export function ConversationWorkspace({
 
 function ConversationPanel({
   thread,
-  messages,
+  threadMessages,
   text,
   setText,
   requestId,
@@ -180,9 +179,10 @@ function ConversationPanel({
   isEnding,
   error,
   success,
+  messages,
 }: {
   thread: ConversationThread;
-  messages: ConversationMessage[];
+  threadMessages: ConversationMessage[];
   text: string;
   setText: (value: string) => void;
   requestId: string;
@@ -193,6 +193,7 @@ function ConversationPanel({
   isEnding: boolean;
   error?: string;
   success?: string;
+  messages: Messages;
 }) {
   const isEnded = thread.conversation.status === "ended";
 
@@ -201,10 +202,10 @@ function ConversationPanel({
       <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            Conversation Coach
+            {messages.conversation.coach}
           </p>
           <h1 className="text-2xl font-semibold">
-            {topicLabels[thread.conversation.topic]}
+            {messages.conversation.topics[thread.conversation.topic]}
           </h1>
         </div>
         <form action={endAction}>
@@ -219,20 +220,27 @@ function ConversationPanel({
             disabled={isEnded || isEnding}
           >
             <Square className="mr-2 h-4 w-4" />
-            {isEnded ? "Ended" : isEnding ? "Ending" : "End"}
+            {isEnded
+              ? messages.conversation.ended
+              : isEnding
+                ? messages.conversation.ending
+                : messages.conversation.end}
           </Button>
         </form>
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto py-5">
-        {messages.length ? (
-          messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+        {threadMessages.length ? (
+          threadMessages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              messages={messages}
+            />
           ))
         ) : (
           <div className="rounded-md border bg-background p-4 text-sm text-muted-foreground">
-            Send a short message. The coach will reply and correct up to two
-            important mistakes.
+            {messages.conversation.sendHint}
           </div>
         )}
       </div>
@@ -257,15 +265,15 @@ function ConversationPanel({
           className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={
             isEnded
-              ? "This conversation has ended."
-              : "Write your reply in English..."
+              ? messages.conversation.endedPlaceholder
+              : messages.conversation.replyPlaceholder
           }
         />
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">{text.length}/800</p>
           <Button type="submit" disabled={!canSend}>
             <Send className="mr-2 h-4 w-4" />
-            {isSending ? "Sending" : "Send"}
+            {isSending ? messages.conversation.sending : messages.conversation.send}
           </Button>
         </div>
       </form>
@@ -273,7 +281,13 @@ function ConversationPanel({
   );
 }
 
-function MessageBubble({ message }: { message: ConversationMessage }) {
+function MessageBubble({
+  message,
+  messages,
+}: {
+  message: ConversationMessage;
+  messages: Messages;
+}) {
   const isUser = message.role === "user";
 
   return (
@@ -293,11 +307,15 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
                 className="rounded-md border bg-card p-3 text-sm"
               >
                 <p>
-                  <span className="text-muted-foreground">Original:</span>{" "}
+                  <span className="text-muted-foreground">
+                    {messages.conversation.original}
+                  </span>{" "}
                   {correction.original}
                 </p>
                 <p className="mt-1">
-                  <span className="text-muted-foreground">Better:</span>{" "}
+                  <span className="text-muted-foreground">
+                    {messages.conversation.better}
+                  </span>{" "}
                   {correction.corrected}
                 </p>
                 <p className="mt-2 text-muted-foreground">

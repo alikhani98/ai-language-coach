@@ -9,17 +9,20 @@ import {
 import type { DailyLesson } from "@/lib/daily/lesson";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatMessage, type Messages } from "@/lib/i18n/config";
 
 type PracticeWorkspaceProps = {
   initialLesson: DailyLesson | null;
   dailyMinutes: number;
+  messages: Messages;
 };
 
-const sections = ["Vocabulary", "Sentence", "Reading", "Speaking"] as const;
+const sectionKeys = ["vocabulary", "sentence", "reading", "speaking"] as const;
 
 export function PracticeWorkspace({
   initialLesson,
   dailyMinutes,
+  messages,
 }: PracticeWorkspaceProps) {
   const [step, setStep] = useState(0);
   const [generateState, generateAction, isGenerating] = useActionState(
@@ -33,11 +36,15 @@ export function PracticeWorkspace({
   const lesson = finishState.lesson ?? generateState.lesson ?? initialLesson;
   const message = finishState.success ?? generateState.success;
   const error = finishState.error ?? generateState.error;
-  const section = sections[step];
+  const section = sectionKeys[step];
 
   const progressLabel = useMemo(
-    () => `${step + 1} of ${sections.length}`,
-    [step],
+    () =>
+      formatMessage(messages.practice.progressLabel, {
+        current: step + 1,
+        total: sectionKeys.length,
+      }),
+    [messages, step],
   );
 
   if (!lesson) {
@@ -45,21 +52,24 @@ export function PracticeWorkspace({
       <div className="rounded-lg border bg-card p-6">
         <div className="max-w-xl space-y-3">
           <p className="text-sm font-medium text-muted-foreground">
-            {dailyMinutes} minute practice
+            {formatMessage(messages.practice.minutePractice, {
+              minutes: dailyMinutes,
+            })}
           </p>
           <h1 className="text-2xl font-semibold">
-            Generate today&apos;s focused lesson.
+            {messages.practice.generateTitle}
           </h1>
           <p className="text-muted-foreground">
-            Your lesson is created once for your local calendar day and reused
-            for review after you finish.
+            {messages.practice.generateBody}
           </p>
         </div>
         {error ? <StatusMessage tone="error" message={error} /> : null}
         <form action={generateAction} className="mt-6">
           <Button type="submit" disabled={isGenerating}>
             <Sparkles className="mr-2 h-4 w-4" />
-            {isGenerating ? "Generating" : "Generate Today's Practice"}
+            {isGenerating
+              ? messages.practice.generating
+              : messages.practice.generateButton}
           </Button>
         </form>
       </div>
@@ -69,10 +79,11 @@ export function PracticeWorkspace({
   if (lesson.generation_status === "pending") {
     return (
       <div className="rounded-lg border bg-card p-6">
-        <h1 className="text-2xl font-semibold">Today&apos;s lesson is coming.</h1>
+        <h1 className="text-2xl font-semibold">
+          {messages.practice.pendingTitle}
+        </h1>
         <p className="mt-3 text-muted-foreground">
-          Generation is already in progress. Refresh in a moment to see the
-          finished practice.
+          {messages.practice.pendingBody}
         </p>
         {error ? <StatusMessage tone="error" message={error} /> : null}
       </div>
@@ -82,15 +93,19 @@ export function PracticeWorkspace({
   if (lesson.generation_status === "failed") {
     return (
       <div className="rounded-lg border bg-card p-6">
-        <h1 className="text-2xl font-semibold">Generation did not finish.</h1>
+        <h1 className="text-2xl font-semibold">
+          {messages.practice.failedTitle}
+        </h1>
         <p className="mt-3 text-muted-foreground">
-          The coach could not create today&apos;s lesson. You can try again.
+          {messages.practice.failedBody}
         </p>
         {error ? <StatusMessage tone="error" message={error} /> : null}
         <form action={generateAction} className="mt-6">
           <Button type="submit" disabled={isGenerating}>
             <Sparkles className="mr-2 h-4 w-4" />
-            {isGenerating ? "Retrying" : "Retry Generation"}
+            {isGenerating
+              ? messages.practice.retrying
+              : messages.practice.retryButton}
           </Button>
         </form>
       </div>
@@ -103,20 +118,25 @@ export function PracticeWorkspace({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              {progressLabel} · {dailyMinutes} minute practice
+              {progressLabel} ·{" "}
+              {formatMessage(messages.practice.minutePractice, {
+                minutes: dailyMinutes,
+              })}
             </p>
-            <h1 className="mt-1 text-2xl font-semibold">{section}</h1>
+            <h1 className="mt-1 text-2xl font-semibold">
+              {messages.practice.sections[step]}
+            </h1>
           </div>
           {lesson.completed ? (
             <span className="inline-flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground">
               <Check className="mr-2 h-4 w-4" />
-              Completed
+              {messages.common.completed}
             </span>
           ) : null}
         </div>
 
         <div className="mt-5 grid grid-cols-4 gap-2">
-          {sections.map((item, index) => (
+          {messages.practice.sections.map((item, index) => (
             <button
               key={item}
               type="button"
@@ -132,10 +152,14 @@ export function PracticeWorkspace({
         </div>
 
         <div className="mt-6 min-h-72">
-          {section === "Vocabulary" ? <Vocabulary lesson={lesson} /> : null}
-          {section === "Sentence" ? <Sentence lesson={lesson} /> : null}
-          {section === "Reading" ? <Reading lesson={lesson} /> : null}
-          {section === "Speaking" ? <Speaking lesson={lesson} /> : null}
+          {section === "vocabulary" ? <Vocabulary lesson={lesson} /> : null}
+          {section === "sentence" ? (
+            <Sentence lesson={lesson} messages={messages} />
+          ) : null}
+          {section === "reading" ? <Reading lesson={lesson} /> : null}
+          {section === "speaking" ? (
+            <Speaking lesson={lesson} messages={messages} />
+          ) : null}
         </div>
 
         {message ? <StatusMessage tone="success" message={message} /> : null}
@@ -149,17 +173,19 @@ export function PracticeWorkspace({
             onClick={() => setStep((current) => Math.max(0, current - 1))}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {messages.common.back}
           </Button>
           <div className="flex gap-3">
-            {step < sections.length - 1 ? (
+            {step < sectionKeys.length - 1 ? (
               <Button
                 type="button"
                 onClick={() =>
-                  setStep((current) => Math.min(sections.length - 1, current + 1))
+                  setStep((current) =>
+                    Math.min(sectionKeys.length - 1, current + 1),
+                  )
                 }
               >
-                Next
+                {messages.common.next}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
@@ -167,10 +193,10 @@ export function PracticeWorkspace({
                 <Button type="submit" disabled={isFinishing || lesson.completed}>
                   <Check className="mr-2 h-4 w-4" />
                   {lesson.completed
-                    ? "Finished"
+                    ? messages.practice.finished
                     : isFinishing
-                      ? "Finishing"
-                      : "Finish Practice"}
+                      ? messages.practice.finishing
+                      : messages.practice.finishPractice}
                 </Button>
               </form>
             )}
@@ -195,12 +221,18 @@ function Vocabulary({ lesson }: { lesson: DailyLesson }) {
   );
 }
 
-function Sentence({ lesson }: { lesson: DailyLesson }) {
+function Sentence({
+  lesson,
+  messages,
+}: {
+  lesson: DailyLesson;
+  messages: Messages;
+}) {
   return (
     <div className="rounded-md border bg-background p-5">
       <p className="text-xl font-medium leading-relaxed">{lesson.sentence}</p>
       <p className="mt-4 text-sm text-muted-foreground">
-        Read it slowly, then say it aloud three times with natural rhythm.
+        {messages.practice.sentenceHint}
       </p>
     </div>
   );
@@ -214,13 +246,18 @@ function Reading({ lesson }: { lesson: DailyLesson }) {
   );
 }
 
-function Speaking({ lesson }: { lesson: DailyLesson }) {
+function Speaking({
+  lesson,
+  messages,
+}: {
+  lesson: DailyLesson;
+  messages: Messages;
+}) {
   return (
     <div className="rounded-md border bg-background p-5">
       <p className="text-lg leading-7">{lesson.speaking_task}</p>
       <p className="mt-4 text-sm text-muted-foreground">
-        Speak aloud independently. This practice does not record audio or score
-        pronunciation.
+        {messages.practice.speakingHint}
       </p>
     </div>
   );

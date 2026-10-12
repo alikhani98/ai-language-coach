@@ -6,13 +6,15 @@ import { login, signup } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { Messages } from "@/lib/i18n/config";
 
 type AuthFormProps = {
   mode: "login" | "signup";
   message?: string;
+  messages: Messages;
 };
 
-export function AuthForm({ mode, message }: AuthFormProps) {
+export function AuthForm({ mode, message, messages }: AuthFormProps) {
   const isLogin = mode === "login";
   const [state, formAction, isPending] = useActionState(
     isLogin ? login : signup,
@@ -23,12 +25,12 @@ export function AuthForm({ mode, message }: AuthFormProps) {
     <div className="mx-auto max-w-sm rounded-lg border bg-card p-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">
-          {isLogin ? "Log in" : "Create account"}
+          {isLogin ? messages.auth.loginTitle : messages.auth.signupTitle}
         </h1>
         <p className="text-sm text-muted-foreground">
           {isLogin
-            ? "Continue your daily English practice."
-            : "Start a calm daily English habit."}
+            ? messages.auth.loginDescription
+            : messages.auth.signupDescription}
         </p>
       </div>
       {message ? (
@@ -43,7 +45,7 @@ export function AuthForm({ mode, message }: AuthFormProps) {
       ) : null}
       <form action={formAction} className="mt-6 space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{messages.common.email}</Label>
           <Input
             id="email"
             name="email"
@@ -53,7 +55,7 @@ export function AuthForm({ mode, message }: AuthFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{messages.common.password}</Label>
           <Input
             id="password"
             name="password"
@@ -64,16 +66,20 @@ export function AuthForm({ mode, message }: AuthFormProps) {
           />
         </div>
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Please wait" : isLogin ? "Log in" : "Sign up"}
+          {isPending
+            ? messages.common.pleaseWait
+            : isLogin
+              ? messages.auth.loginSubmit
+              : messages.auth.signupSubmit}
         </Button>
       </form>
       <p className="mt-4 text-sm text-muted-foreground">
-        {isLogin ? "No account yet?" : "Already have an account?"}{" "}
+        {isLogin ? messages.auth.noAccount : messages.auth.hasAccount}{" "}
         <Link
           className="font-medium text-primary"
           href={isLogin ? "/signup" : "/login"}
         >
-          {isLogin ? "Sign up" : "Log in"}
+          {isLogin ? messages.auth.signupSubmit : messages.auth.loginSubmit}
         </Link>
       </p>
     </div>

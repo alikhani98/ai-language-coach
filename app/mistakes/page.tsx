@@ -1,6 +1,7 @@
 import { requireProfile } from "@/lib/actions/profile";
 import { getMistakeNotebook } from "@/lib/actions/mistakes";
 import { MistakeNotebook } from "@/components/mistake-notebook";
+import { getMessages } from "@/lib/i18n/config";
 
 type MistakesPageProps = {
   searchParams: Promise<{
@@ -9,22 +10,22 @@ type MistakesPageProps = {
 };
 
 export default async function MistakesPage({ searchParams }: MistakesPageProps) {
-  await requireProfile();
+  const profile = await requireProfile();
   const params = await searchParams;
   const notebook = await getMistakeNotebook(params.category);
+  const messages = getMessages(profile.interface_language);
 
   return (
     <section className="space-y-6">
       <div className="max-w-2xl space-y-3">
         <p className="text-sm font-medium text-muted-foreground">
-          Mistake notebook
+          {messages.mistakes.eyebrow}
         </p>
         <h1 className="text-3xl font-semibold tracking-normal">
-          Review corrections from real practice.
+          {messages.mistakes.heading}
         </h1>
         <p className="text-muted-foreground">
-          These entries come from saved conversation corrections. Treat them as
-          useful feedback, not a full assessment of your English.
+          {messages.mistakes.body}
         </p>
       </div>
 
@@ -34,7 +35,7 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
             href="/mistakes"
             className="rounded-md border bg-background px-3 py-2 text-sm"
           >
-            All
+            {messages.mistakes.all}
           </a>
           {notebook.categories.map((category) => (
             <a
@@ -51,6 +52,7 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
       <MistakeNotebook
         mistakes={notebook.mistakes}
         groups={notebook.groups}
+        messages={messages}
       />
     </section>
   );

@@ -1,10 +1,19 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/user";
-import { profileSchema, type ProfileInput } from "@/lib/validations/profile";
+import {
+  interfaceLanguageSchema,
+  profileSchema,
+  themePreferenceSchema,
+  type ProfileInput,
+} from "@/lib/validations/profile";
 import { isProfileComplete } from "@/lib/daily/lesson";
+import type { InterfaceLanguage } from "@/lib/i18n/config";
+import { getMessages } from "@/lib/i18n/config";
+import type { ThemePreference } from "@/lib/theme/config";
 
 export type ProfileActionState = {
   error?: string;
@@ -17,6 +26,8 @@ export type UserProfile = {
   goal: ProfileInput["goal"];
   daily_minutes: number;
   timezone: string;
+  interface_language: InterfaceLanguage;
+  theme_preference: ThemePreference;
   created_at: string;
 };
 
@@ -26,6 +37,8 @@ function parseProfileForm(formData: FormData) {
     goal: formData.get("goal"),
     daily_minutes: formData.get("daily_minutes"),
     timezone: formData.get("timezone") || "UTC",
+    interface_language: formData.get("interface_language") || "en",
+    theme_preference: formData.get("theme_preference") || "system",
   });
 }
 
@@ -34,7 +47,7 @@ export async function getProfile(): Promise<UserProfile | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("users_profile")
-    .select("id,user_id,level,goal,daily_minutes,timezone,created_at")
+    .select("id,user_id,level,goal,daily_minutes,timezone,interface_language,theme_preference,created_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -64,7 +77,7 @@ export async function createProfile(
 
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Check your preferences.",
+      error: parsed.error.issues[0]?.message ?? getMessages("en").actions.profileInvalid,
     };
   }
 
@@ -75,6 +88,8 @@ export async function createProfile(
     goal: parsed.data.goal,
     daily_minutes: parsed.data.daily_minutes,
     timezone: parsed.data.timezone,
+    interface_language: parsed.data.interface_language,
+    theme_preference: parsed.data.theme_preference,
   });
 
   if (error) {
@@ -93,7 +108,7 @@ export async function updateProfile(
 
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Check your preferences.",
+      error: parsed.error.issues[0]?.message ?? getMessages("en").actions.profileInvalid,
     };
   }
 
@@ -105,6 +120,8 @@ export async function updateProfile(
       goal: parsed.data.goal,
       daily_minutes: parsed.data.daily_minutes,
       timezone: parsed.data.timezone,
+      interface_language: parsed.data.interface_language,
+      theme_preference: parsed.data.theme_preference,
     })
     .eq("user_id", user.id);
 
@@ -113,4 +130,42 @@ export async function updateProfile(
   }
 
   redirect("/dashboard");
+}
+
+export async function updateInterfaceLanguage(formData: FormData) {
+  const user = await requireUser();
+  const parsed = interfaceLanguageSchema.safeParse(
+    formData.get("interface_language"),
+  );
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const supabase = await createClient();
+  await supabase
+    .from("users_profile")
+    .update({ interface_language: parsed.data })
+    .eq("user_id", user.id);
+
+  revalidatePath("/", "layout");
+}
+
+export async function updateThemePreference(formData: FormData) {
+  const user = await requireUser();
+  const parsed = themePreferenceSchema.safeParse(
+    formData.get("theme_preference"),
+  );
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const supabase = await createClient();
+  await supabase
+    .from("users_profile")
+    .update({ theme_preference: parsed.data })
+    .eq("user_id", user.id);
+
+  revalidatePath("/", "layout");
 }

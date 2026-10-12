@@ -1,47 +1,48 @@
 import { requireProfile } from "@/lib/actions/profile";
 import { getProgressData } from "@/lib/actions/progress";
+import { getMessages } from "@/lib/i18n/config";
 
 export default async function ProgressPage() {
-  await requireProfile();
+  const profile = await requireProfile();
   const progress = await getProgressData();
+  const messages = getMessages(profile.interface_language);
 
   return (
     <section className="space-y-6">
       <div className="max-w-2xl space-y-3">
         <p className="text-sm font-medium text-muted-foreground">
-          Progress tracking
+          {messages.progress.eyebrow}
         </p>
         <h1 className="text-3xl font-semibold tracking-normal">
-          Your recent English practice
+          {messages.progress.heading}
         </h1>
         <p className="text-muted-foreground">
-          Practice days are counted from completed lessons or completed
-          conversation exchanges, using your local calendar day.
+          {messages.progress.body}
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Metric
-          label="Last 7 days"
-          value={`${progress.summary.practiceDaysLast7} days`}
+          label={messages.progress.last7}
+          value={`${progress.summary.practiceDaysLast7} ${messages.common.days}`}
         />
         <Metric
-          label="Last 14 days"
-          value={`${progress.summary.practiceDaysLast14} days`}
+          label={messages.progress.last14}
+          value={`${progress.summary.practiceDaysLast14} ${messages.common.days}`}
         />
         <Metric
-          label="Current streak"
-          value={`${progress.summary.currentStreak} days`}
+          label={messages.progress.currentStreak}
+          value={`${progress.summary.currentStreak} ${messages.common.days}`}
         />
         <Metric
-          label="Completed lessons"
+          label={messages.progress.completedLessons}
           value={`${progress.summary.totalCompletedLessons}`}
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-lg border bg-card p-5">
-          <h2 className="font-semibold">Topics practiced</h2>
+          <h2 className="font-semibold">{messages.progress.topics}</h2>
           <div className="mt-4 space-y-3">
             {progress.topicCounts.length ? (
               progress.topicCounts.map((topic) => (
@@ -51,20 +52,23 @@ export default async function ProgressPage() {
                 >
                   <span>{topic.topic.replaceAll("_", " ")}</span>
                   <span className="text-muted-foreground">
-                    {topic.count} {topic.count === 1 ? "conversation" : "conversations"}
+                    {topic.count}{" "}
+                    {topic.count === 1
+                      ? messages.progress.conversation
+                      : messages.progress.conversations}
                   </span>
                 </div>
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                No completed conversation exchanges yet.
+                {messages.progress.noTopics}
               </p>
             )}
           </div>
         </section>
 
         <section className="rounded-lg border bg-card p-5">
-          <h2 className="font-semibold">Observed weak areas</h2>
+          <h2 className="font-semibold">{messages.progress.weakAreas}</h2>
           <div className="mt-4 space-y-3">
             {progress.weakAreas.length ? (
               progress.weakAreas.map((area) => (
@@ -74,13 +78,16 @@ export default async function ProgressPage() {
                 >
                   <span>{area.category}</span>
                   <span className="text-muted-foreground">
-                    {area.count} {area.count === 1 ? "correction" : "corrections"}
+                    {area.count}{" "}
+                    {area.count === 1
+                      ? messages.progress.correction
+                      : messages.progress.corrections}
                   </span>
                 </div>
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                No correction patterns have been observed yet.
+                {messages.progress.noWeakAreas}
               </p>
             )}
           </div>
@@ -88,7 +95,7 @@ export default async function ProgressPage() {
       </div>
 
       <section className="rounded-lg border bg-card p-5">
-        <h2 className="font-semibold">Recent learning activity</h2>
+        <h2 className="font-semibold">{messages.progress.recent}</h2>
         <div className="mt-4 space-y-3">
           {progress.recentActivity.length ? (
             progress.recentActivity.map((activity) => (
@@ -96,7 +103,11 @@ export default async function ProgressPage() {
                 key={activity.id}
                 className="flex flex-col gap-1 rounded-md border bg-background px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
               >
-                <span>{activity.title}</span>
+                <span>
+                  {activity.type === "daily_lesson"
+                    ? messages.dashboard.completed
+                    : messages.progress.conversation}
+                </span>
                 <span className="text-muted-foreground">
                   {activity.occurred_at}
                 </span>
@@ -104,7 +115,7 @@ export default async function ProgressPage() {
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              No completed practice yet.
+              {messages.progress.noActivity}
             </p>
           )}
         </div>

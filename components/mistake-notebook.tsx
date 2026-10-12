@@ -8,13 +8,19 @@ import {
 } from "@/lib/actions/mistakes";
 import type { Mistake, MistakeGroup } from "@/lib/mistakes/model";
 import { Button } from "@/components/ui/button";
+import type { Messages } from "@/lib/i18n/config";
 
 type MistakeNotebookProps = {
   mistakes: Mistake[];
   groups: MistakeGroup[];
+  messages: Messages;
 };
 
-export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
+export function MistakeNotebook({
+  mistakes,
+  groups,
+  messages,
+}: MistakeNotebookProps) {
   const [syncState, syncAction, isSyncing] = useActionState(
     syncConversationCorrectionsAction,
     {},
@@ -25,16 +31,17 @@ export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 rounded-lg border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-semibold">Conversation corrections</h2>
+          <h2 className="font-semibold">
+            {messages.mistakes.conversationCorrections}
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sync saved coach corrections into this notebook without calling AI
-            again.
+            {messages.mistakes.syncBody}
           </p>
         </div>
         <form action={syncAction}>
           <Button type="submit" variant="outline" disabled={isSyncing}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            {isSyncing ? "Syncing" : "Sync corrections"}
+            {isSyncing ? messages.common.syncing : messages.mistakes.sync}
           </Button>
         </form>
       </div>
@@ -53,7 +60,7 @@ export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
       ) : null}
 
       <section className="rounded-lg border bg-card p-5">
-        <h2 className="font-semibold">Frequent corrections</h2>
+        <h2 className="font-semibold">{messages.mistakes.frequent}</h2>
         <div className="mt-4 grid gap-3">
           {groups.length ? (
             groups.slice(0, 6).map((group) => (
@@ -61,29 +68,36 @@ export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-medium">{group.category}</p>
                   <span className="text-sm text-muted-foreground">
-                    {group.count} {group.count === 1 ? "time" : "times"}
+                    {group.count}{" "}
+                    {group.count === 1
+                      ? messages.mistakes.time
+                      : messages.mistakes.times}
                   </span>
                 </div>
                 <p className="mt-3 text-sm">
-                  <span className="text-muted-foreground">Original:</span>{" "}
+                  <span className="text-muted-foreground">
+                    {messages.mistakes.original}
+                  </span>{" "}
                   {group.wrong_sentence}
                 </p>
                 <p className="mt-1 text-sm">
-                  <span className="text-muted-foreground">Correct:</span>{" "}
+                  <span className="text-muted-foreground">
+                    {messages.mistakes.correct}
+                  </span>{" "}
                   {group.correct_sentence}
                 </p>
               </div>
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              No repeated corrections yet.
+              {messages.mistakes.noRepeated}
             </p>
           )}
         </div>
       </section>
 
       <section className="rounded-lg border bg-card p-5">
-        <h2 className="font-semibold">Notebook entries</h2>
+        <h2 className="font-semibold">{messages.mistakes.notebookEntries}</h2>
         <div className="mt-4 space-y-3">
           {mistakes.length ? (
             mistakes.map((mistake) => (
@@ -94,11 +108,15 @@ export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-2">
                     <p className="text-sm">
-                      <span className="text-muted-foreground">Original:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {messages.mistakes.original}
+                      </span>{" "}
                       {mistake.wrong_sentence}
                     </p>
                     <p className="text-sm">
-                      <span className="text-muted-foreground">Correct:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {messages.mistakes.correct}
+                      </span>{" "}
                       {mistake.correct_sentence}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -122,7 +140,7 @@ export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
                       disabled={isRemoving}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Remove
+                      {messages.common.remove}
                     </Button>
                   </form>
                 </div>
@@ -130,8 +148,7 @@ export function MistakeNotebook({ mistakes, groups }: MistakeNotebookProps) {
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              No saved corrections yet. Conversation feedback can be synced here
-              when it appears.
+              {messages.mistakes.noSaved}
             </p>
           )}
         </div>

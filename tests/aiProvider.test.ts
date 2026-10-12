@@ -230,6 +230,7 @@ describe("AI provider architecture", () => {
           goal: "Work",
           dailyMinutes: 15,
           timezone: "Asia/Tehran",
+          interfaceLanguage: "en",
         },
         history: {
           previousMistakes: [],
@@ -303,6 +304,7 @@ describe("AI provider architecture", () => {
         profile: {
           level: "B1 Intermediate",
           goal: "Conversation",
+          interfaceLanguage: "fa",
         },
         topic: "daily_life",
         recentMessages: [],
@@ -313,6 +315,15 @@ describe("AI provider architecture", () => {
       corrections: [],
     });
     expect(provider.generateConversationResponse).toHaveBeenCalledOnce();
+    expect(provider.generateConversationResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            content: expect.stringContaining("Interface language: fa"),
+          }),
+        ]),
+      }),
+    );
   });
 
   it("generates daily lessons using a mocked provider", async () => {
@@ -326,6 +337,7 @@ describe("AI provider architecture", () => {
           goal: "Work",
           dailyMinutes: 15,
           timezone: "Asia/Tehran",
+          interfaceLanguage: "en",
         },
         history: {
           previousMistakes: ["I go yesterday"],
@@ -344,6 +356,7 @@ describe("AI provider architecture", () => {
       analyzeMistake({
         sentence: "I go yesterday.",
         context: "Past weekend conversation",
+        interfaceLanguage: "fa",
       }),
     ).resolves.toEqual({
       correctSentence: "I went yesterday.",

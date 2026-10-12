@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { requireProfile } from "@/lib/actions/profile";
 import { getTodaysLesson } from "@/lib/actions/dailyLesson";
 import { getProgressData } from "@/lib/actions/progress";
-
-const activities = ["Vocabulary", "Sentence", "Reading", "Speaking"];
+import { formatMessage, getMessages } from "@/lib/i18n/config";
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
@@ -14,20 +13,22 @@ export default async function DashboardPage() {
     getProgressData(),
   ]);
   const isReady = lesson?.generation_status === "ready";
+  const messages = getMessages(profile.interface_language);
 
   return (
     <div className="space-y-8">
       <section className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">
-          Ready for your {profile.daily_minutes} minute English practice?
+          {formatMessage(messages.dashboard.eyebrow, {
+            minutes: profile.daily_minutes,
+          })}
         </p>
         <div className="max-w-2xl space-y-3">
           <h1 className="text-3xl font-semibold tracking-normal">
-            Your focused English practice is ready.
+            {messages.dashboard.heading}
           </h1>
           <p className="text-muted-foreground">
-            A calm 10-15 minute plan with vocabulary, one useful sentence,
-            short input, and a speaking prompt.
+            {messages.dashboard.body}
           </p>
         </div>
       </section>
@@ -35,15 +36,19 @@ export default async function DashboardPage() {
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-lg border bg-card p-5">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">Today&apos;s practice</h2>
+            <h2 className="text-lg font-semibold">
+              {messages.dashboard.todaysPractice}
+            </h2>
             <Button asChild>
               <Link href="/practice">
-                {isReady ? "Open practice" : "Generate practice"}
+                {isReady
+                  ? messages.dashboard.openPractice
+                  : messages.dashboard.generatePractice}
               </Link>
             </Button>
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {activities.map((activity) => (
+            {messages.dashboard.activities.map((activity) => (
               <div
                 key={activity}
                 className="flex items-center gap-3 rounded-md border bg-background p-3"
@@ -55,41 +60,47 @@ export default async function DashboardPage() {
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             {lesson?.completed
-              ? "Today's lesson is completed and available for review."
+              ? messages.dashboard.completed
               : isReady
-                ? "Today's lesson is ready."
-                : "No lesson has been generated for today yet."}
+                ? messages.dashboard.ready
+                : messages.dashboard.none}
           </p>
         </div>
 
         <div className="rounded-lg border bg-card p-5">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">Progress</h2>
+            <h2 className="text-lg font-semibold">
+              {messages.dashboard.progress}
+            </h2>
             <div className="flex gap-2">
               <Button asChild variant="outline" size="sm">
-                <Link href="/progress">Progress</Link>
+                <Link href="/progress">{messages.nav.progress}</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/mistakes">Mistakes</Link>
+                <Link href="/mistakes">{messages.nav.mistakes}</Link>
               </Button>
             </div>
           </div>
           <dl className="mt-5 grid grid-cols-2 gap-4">
             <div>
-              <dt className="text-sm text-muted-foreground">Current streak</dt>
+              <dt className="text-sm text-muted-foreground">
+                {messages.dashboard.currentStreak}
+              </dt>
               <dd className="mt-1 text-2xl font-semibold">
-                {progress.summary.currentStreak} days
+                {progress.summary.currentStreak} {messages.common.days}
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Last 14 days</dt>
+              <dt className="text-sm text-muted-foreground">
+                {messages.dashboard.last14Days}
+              </dt>
               <dd className="mt-1 text-2xl font-semibold">
                 {progress.summary.practiceDaysLast14}
               </dd>
             </div>
             <div className="col-span-2">
               <dt className="text-sm text-muted-foreground">
-                Observed correction categories
+                {messages.dashboard.weakAreas}
               </dt>
               <dd className="mt-2 space-y-2 text-sm">
                 {progress.weakAreas.length
@@ -104,7 +115,7 @@ export default async function DashboardPage() {
                         </span>
                       </div>
                     ))
-                  : "No correction patterns yet."}
+                  : messages.dashboard.noPatterns}
               </dd>
             </div>
           </dl>

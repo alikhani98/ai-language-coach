@@ -77,12 +77,20 @@ export function isProfileComplete(profile: {
   goal?: string | null;
   daily_minutes?: number | null;
   timezone?: string | null;
+  interface_language?: string | null;
+  theme_preference?: string | null;
 } | null) {
   return Boolean(
     profile?.level &&
       profile.goal &&
       profile.daily_minutes &&
       [10, 15, 30].includes(profile.daily_minutes) &&
-      profile.timezone,
+      profile.timezone &&
+      (profile.interface_language === undefined ||
+        profile.interface_language === null ||
+        ["en", "fa"].includes(profile.interface_language)) &&
+      (profile.theme_preference === undefined ||
+        profile.theme_preference === null ||
+        ["light", "dark", "system", "auto"].includes(profile.theme_preference)),
   );
 }

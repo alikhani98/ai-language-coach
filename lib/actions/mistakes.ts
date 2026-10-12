@@ -8,6 +8,7 @@ import {
   type Mistake,
 } from "@/lib/mistakes/model";
 import { createClient } from "@/lib/supabase/server";
+import { getMessages } from "@/lib/i18n/config";
 import {
   conversationCorrectionSchema,
   type ConversationCorrection,
@@ -107,17 +108,19 @@ export async function syncConversationCorrectionsAction(
 
   try {
     const result = await syncConversationCorrections();
+    const profile = await requireProfile();
+    const messages = getMessages(profile.interface_language);
     return {
       success: result.inserted
-        ? "Corrections synced to your notebook."
-        : "No new corrections to sync.",
+        ? messages.actions.mistakesSynced
+        : messages.actions.mistakesNoNew,
     };
   } catch (error) {
     return {
       error:
         error instanceof Error
           ? error.message
-          : "Could not sync corrections right now.",
+          : getMessages("en").actions.mistakesSyncFailed,
     };
   }
 }
@@ -218,12 +221,13 @@ export async function removeMistake(
 ): Promise<MistakeActionState> {
   void previousState;
   const parsed = mistakeIdSchema.safeParse(formData.get("mistakeId"));
+  const profile = await requireProfile();
+  const messages = getMessages(profile.interface_language);
 
   if (!parsed.success) {
-    return { error: "Notebook entry was not found." };
+    return { error: messages.actions.mistakeNotFound };
   }
 
-  const profile = await requireProfile();
   const supabase = await createClient();
   const { error } = await supabase
     .from("mistakes")
@@ -239,5 +243,5 @@ export async function removeMistake(
   revalidatePath("/progress");
   revalidatePath("/dashboard");
 
-  return { success: "Notebook entry removed." };
+  return { success: messages.actions.mistakeRemoved };
 }

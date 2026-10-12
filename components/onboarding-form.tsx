@@ -6,6 +6,7 @@ import { createProfile } from "@/lib/actions/profile";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ProfileInput } from "@/lib/validations/profile";
+import { getMessages, type InterfaceLanguage } from "@/lib/i18n/config";
 
 type Option<T extends string | number> = {
   value: T;
@@ -13,29 +14,25 @@ type Option<T extends string | number> = {
   description?: string;
 };
 
-const levelOptions: Option<ProfileInput["level"]>[] = [
-  { value: "a1_beginner", label: "A1 Beginner", description: "Simple words and phrases." },
-  { value: "a2_elementary", label: "A2 Elementary", description: "Everyday basics." },
-  { value: "b1_intermediate", label: "B1 Intermediate", description: "Common conversations." },
-  { value: "b2_upper_intermediate", label: "B2 Upper Intermediate", description: "Clear, confident expression." },
-  { value: "c1_advanced", label: "C1 Advanced", description: "Nuanced, flexible English." },
+const levelValues: ProfileInput["level"][] = [
+  "a1_beginner",
+  "a2_elementary",
+  "b1_intermediate",
+  "b2_upper_intermediate",
+  "c1_advanced",
 ];
-
-const goalOptions: Option<ProfileInput["goal"]>[] = [
-  { value: "conversation", label: "Conversation" },
-  { value: "work", label: "Work" },
-  { value: "travel", label: "Travel" },
-  { value: "exam", label: "Exam" },
-  { value: "personal_growth", label: "Personal Growth" },
+const goalValues: ProfileInput["goal"][] = [
+  "conversation",
+  "work",
+  "travel",
+  "exam",
+  "personal_growth",
 ];
-
-const timeOptions: Option<ProfileInput["daily_minutes"]>[] = [
-  { value: 10, label: "10 minutes" },
-  { value: 15, label: "15 minutes" },
-  { value: 30, label: "30 minutes" },
+const timeValues: ProfileInput["daily_minutes"][] = [10, 15, 30];
+const languageOptions: Option<InterfaceLanguage>[] = [
+  { value: "fa", label: "فارسی" },
+  { value: "en", label: "English" },
 ];
-
-const steps = ["Level", "Goal", "Time"];
 
 export function OnboardingForm() {
   const [state, formAction, isPending] = useActionState(createProfile, {});
@@ -44,7 +41,43 @@ export function OnboardingForm() {
   const [goal, setGoal] = useState<ProfileInput["goal"]>("conversation");
   const [dailyMinutes, setDailyMinutes] =
     useState<ProfileInput["daily_minutes"]>(15);
+  const [interfaceLanguage, setInterfaceLanguage] =
+    useState<InterfaceLanguage>("en");
   const [timezone, setTimezone] = useState("UTC");
+  const messages = getMessages(interfaceLanguage);
+  const steps = useMemo(
+    () => [
+      messages.onboarding.steps.level,
+      messages.onboarding.steps.goal,
+      messages.onboarding.steps.time,
+      messages.onboarding.steps.language,
+    ],
+    [messages],
+  );
+  const levelOptions = useMemo<Option<ProfileInput["level"]>[]>(
+    () =>
+      levelValues.map((value) => {
+        const [label, description] = messages.onboarding.levels[value];
+        return { value, label, description };
+      }),
+    [messages],
+  );
+  const goalOptions = useMemo<Option<ProfileInput["goal"]>[]>(
+    () =>
+      goalValues.map((value) => ({
+        value,
+        label: messages.onboarding.goals[value],
+      })),
+    [messages],
+  );
+  const timeOptions = useMemo<Option<ProfileInput["daily_minutes"]>[]>(
+    () =>
+      timeValues.map((value) => ({
+        value,
+        label: messages.onboarding.minutes[String(value) as "10" | "15" | "30"],
+      })),
+    [messages],
+  );
 
   useEffect(() => {
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
@@ -53,16 +86,19 @@ export function OnboardingForm() {
   const canGoBack = step > 0;
   const isLastStep = step === steps.length - 1;
   const title = useMemo(() => {
-    if (step === 0) return "What is your English level?";
-    if (step === 1) return "What are you practicing for?";
-    return "How much time feels realistic each day?";
-  }, [step]);
+    if (step === 0) return messages.onboarding.levelTitle;
+    if (step === 1) return messages.onboarding.goalTitle;
+    if (step === 2) return messages.onboarding.timeTitle;
+    return messages.onboarding.languageTitle;
+  }, [messages, step]);
 
   return (
     <div className="mx-auto max-w-2xl rounded-lg border bg-card p-5 sm:p-6">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          Step {step + 1} of {steps.length}
+          {messages.onboarding.step
+            .replace("{current}", String(step + 1))
+            .replace("{total}", String(steps.length))}
         </p>
         <h1 className="text-2xl font-semibold">{title}</h1>
         <div className="grid grid-cols-3 gap-2 pt-2">
@@ -91,6 +127,11 @@ export function OnboardingForm() {
         <input type="hidden" name="goal" value={goal} />
         <input type="hidden" name="daily_minutes" value={dailyMinutes} />
         <input type="hidden" name="timezone" value={timezone} />
+        <input
+          type="hidden"
+          name="interface_language"
+          value={interfaceLanguage}
+        />
 
         {step === 0 ? (
           <OptionGrid
@@ -112,6 +153,14 @@ export function OnboardingForm() {
           />
         ) : null}
 
+        {step === 3 ? (
+          <OptionGrid
+            options={languageOptions}
+            value={interfaceLanguage}
+            onChange={setInterfaceLanguage}
+          />
+        ) : null}
+
         <div className="flex items-center justify-between gap-3 border-t pt-5">
           <Button
             type="button"
@@ -120,12 +169,12 @@ export function OnboardingForm() {
             onClick={() => setStep((current) => Math.max(0, current - 1))}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {messages.common.back}
           </Button>
 
           {isLastStep ? (
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving" : "Start practice"}
+              {isPending ? messages.common.saving : messages.onboarding.startPractice}
               <Check className="ml-2 h-4 w-4" />
             </Button>
           ) : (
@@ -136,7 +185,7 @@ export function OnboardingForm() {
                 setStep((current) => Math.min(steps.length - 1, current + 1))
               }
             >
-              Continue
+              {messages.common.continue}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}

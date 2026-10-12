@@ -1,4 +1,5 @@
 import { AuthForm } from "@/components/auth-form";
+import { getMessages } from "@/lib/i18n/config";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -6,17 +7,17 @@ type LoginPageProps = {
   }>;
 };
 
-const messages: Record<string, string> = {
-  "check-email": "Check your email to confirm your account, then log in.",
-};
-
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+  const messages = getMessages("en");
 
   return (
     <AuthForm
       mode="login"
-      message={params.message ? messages[params.message] : undefined}
+      messages={messages}
+      message={
+        params.message === "check-email" ? messages.auth.checkEmail : undefined
+      }
     />
   );
 }

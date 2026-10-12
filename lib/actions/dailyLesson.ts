@@ -11,6 +11,7 @@ import {
   type DailyLesson,
 } from "@/lib/daily/lesson";
 import { createClient } from "@/lib/supabase/server";
+import { getMessages } from "@/lib/i18n/config";
 
 type LessonActionState = {
   lesson?: DailyLesson | null;
@@ -113,16 +114,17 @@ export async function generateTodaysLesson(
 ): Promise<LessonActionState> {
   void previousState;
   const { profile, today } = await getLessonContext();
+  const messages = getMessages(profile.interface_language);
   const existing = await fetchLesson(profile.user_id, today);
 
   if (existing?.generation_status === "ready") {
-    return { lesson: existing, success: "Today's lesson is ready." };
+    return { lesson: existing, success: messages.actions.dailyReady };
   }
 
   if (existing?.generation_status === "pending") {
     return {
       lesson: existing,
-      error: "Today's lesson is already being generated. Refresh in a moment.",
+      error: messages.actions.dailyPending,
     };
   }
 
@@ -132,17 +134,17 @@ export async function generateTodaysLesson(
   const claimed = claim.lesson;
 
   if (!claimed) {
-    return { lesson: null, error: "Could not prepare today's lesson." };
+    return { lesson: null, error: messages.actions.dailyPrepareFailed };
   }
 
   if (claimed.generation_status === "ready") {
-    return { lesson: claimed, success: "Today's lesson is ready." };
+    return { lesson: claimed, success: messages.actions.dailyReady };
   }
 
   if (claimed.generation_status === "pending" && !claim.claimed) {
     return {
       lesson: claimed,
-      error: "Today's lesson is already being generated. Refresh in a moment.",
+      error: messages.actions.dailyPending,
     };
   }
 
@@ -168,6 +170,7 @@ export async function generateTodaysLesson(
           goal: profile.goal,
           dailyMinutes: profile.daily_minutes,
           timezone: profile.timezone,
+          interfaceLanguage: profile.interface_language,
         },
         history: await getLessonHistory(profile.user_id),
       }),
@@ -196,7 +199,7 @@ export async function generateTodaysLesson(
 
     return {
       lesson: mapLessonRow(data),
-      success: "Today's lesson is ready.",
+      success: messages.actions.dailyReady,
     };
   } catch (error) {
     await supabase
@@ -210,7 +213,7 @@ export async function generateTodaysLesson(
       error:
         error instanceof Error
           ? error.message
-          : "Daily lesson generation failed. Try again.",
+          : messages.actions.dailyGenerationFailed,
     };
   }
 }
@@ -220,18 +223,19 @@ export async function finishTodaysLesson(
 ): Promise<LessonActionState> {
   void previousState;
   const { profile, today } = await getLessonContext();
+  const messages = getMessages(profile.interface_language);
   const lesson = await fetchLesson(profile.user_id, today);
 
   if (!lesson) {
-    return { lesson: null, error: "Generate today's lesson first." };
+    return { lesson: null, error: messages.actions.dailyGenerateFirst };
   }
 
   if (lesson.generation_status !== "ready") {
-    return { lesson, error: "Today's lesson is not ready yet." };
+    return { lesson, error: messages.actions.dailyNotReady };
   }
 
   if (lesson.completed) {
-    return { lesson, success: "Practice was already completed." };
+    return { lesson, success: messages.actions.dailyAlreadyCompleted };
   }
 
   const supabase = await createClient();
@@ -252,6 +256,6 @@ export async function finishTodaysLesson(
 
   return {
     lesson: mapLessonRow(data),
-    success: "Practice completed.",
+    success: messages.actions.dailyCompleted,
   };
 }

@@ -10,6 +10,7 @@ export type DailyCoachInput = {
     goal: string;
     dailyMinutes: number;
     timezone: string;
+    interfaceLanguage: string;
   };
   history: {
     previousMistakes: string[];
@@ -31,6 +32,7 @@ function buildPrompt(input: DailyCoachInput) {
     `Goal: ${input.userProfile.goal}`,
     `Daily practice time: ${input.userProfile.dailyMinutes} minutes`,
     `Timezone: ${input.userProfile.timezone}`,
+    `Interface language: ${input.userProfile.interfaceLanguage}`,
     `Previous mistakes: ${input.history.previousMistakes.join("; ") || "none"}`,
     `Previous topics: ${input.history.previousTopics.join("; ") || "none"}`,
     "",
@@ -39,6 +41,7 @@ function buildPrompt(input: DailyCoachInput) {
     `Reading length should be ${getReadingLength(input.userProfile.dailyMinutes)}.`,
     "Vocabulary must include 3 to 5 practical items, each with meaning and example.",
     "The speaking task is for speaking aloud independently. Do not mention recording, microphones, transcription, pronunciation scoring, or live feedback.",
+    "Keep the learning language English. Do not translate target English sentences, vocabulary items, or examples.",
   ].join("\n");
 }
 

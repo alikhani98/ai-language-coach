@@ -4,19 +4,23 @@ import { logout } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/auth/user";
 import { getProfile } from "@/lib/actions/profile";
 import { Button } from "@/components/ui/button";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/practice", label: "Practice" },
-  { href: "/conversation", label: "Conversation" },
-  { href: "/progress", label: "Progress" },
-  { href: "/mistakes", label: "Mistakes" },
-];
+import { LanguageSelector } from "@/components/language-selector";
+import { ThemeSelector } from "@/components/theme-selector";
+import { getMessages, resolveInterfaceLanguage } from "@/lib/i18n/config";
 
 export async function AppNav() {
   const user = await getCurrentUser();
   const profile = user ? await getProfile() : null;
   const isOnboardingComplete = Boolean(profile);
+  const language = resolveInterfaceLanguage(profile);
+  const messages = getMessages(language);
+  const navItems = [
+    { href: "/dashboard", label: messages.nav.dashboard },
+    { href: "/practice", label: messages.nav.practice },
+    { href: "/conversation", label: messages.nav.conversation },
+    { href: "/progress", label: messages.nav.progress },
+    { href: "/mistakes", label: messages.nav.mistakes },
+  ];
 
   return (
     <header className="border-b bg-background/90">
@@ -26,7 +30,7 @@ export async function AppNav() {
           className="flex items-center gap-2 font-semibold"
         >
           <BookOpenText className="h-5 w-5 text-primary" />
-          AI Language Coach
+          {messages.common.appName}
         </Link>
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
           {user && isOnboardingComplete
@@ -42,23 +46,40 @@ export async function AppNav() {
             : null}
           {user && !isOnboardingComplete ? (
             <Link href="/onboarding" className="font-medium text-primary">
-              Complete onboarding
+              {messages.nav.completeOnboarding}
             </Link>
           ) : null}
         </div>
-        {user ? (
-          <form action={logout}>
-            <Button type="submit" variant="outline" size="sm">
-              Log out
-            </Button>
-          </form>
+        {user && profile ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <LanguageSelector
+              currentLanguage={language}
+              messages={messages}
+            />
+            <ThemeSelector messages={messages} persistToProfile />
+            <form action={logout}>
+              <Button type="submit" variant="outline" size="sm">
+                {messages.nav.logout}
+              </Button>
+            </form>
+          </div>
+        ) : user ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <ThemeSelector messages={messages} persistToProfile={false} />
+            <form action={logout}>
+              <Button type="submit" variant="outline" size="sm">
+                {messages.nav.logout}
+              </Button>
+            </form>
+          </div>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <ThemeSelector messages={messages} persistToProfile={false} />
             <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Log in</Link>
+              <Link href="/login">{messages.nav.login}</Link>
             </Button>
             <Button asChild size="sm">
-              <Link href="/signup">Sign up</Link>
+              <Link href="/signup">{messages.nav.signup}</Link>
             </Button>
           </div>
         )}

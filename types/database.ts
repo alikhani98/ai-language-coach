@@ -20,6 +20,8 @@ export type Database = {
           goal: string;
           daily_minutes: number;
           timezone: string;
+          interface_language: string;
+          theme_preference: string;
           created_at: string;
         } & DbRecord;
         Insert: {
@@ -29,6 +31,8 @@ export type Database = {
           goal: string;
           daily_minutes?: number;
           timezone?: string;
+          interface_language?: string;
+          theme_preference?: string;
           created_at?: string;
         } & DbRecord;
         Update: {
@@ -38,6 +42,8 @@ export type Database = {
           goal?: string;
           daily_minutes?: number;
           timezone?: string;
+          interface_language?: string;
+          theme_preference?: string;
           created_at?: string;
         } & DbRecord;
         Relationships: [];
@@ -221,7 +227,17 @@ export type Database = {
       };
     };
     Views: EmptyObject;
-    Functions: EmptyObject;
+    Functions: {
+      insert_assistant_conversation_message: {
+        Args: {
+          p_conversation_id: string;
+          p_content: string;
+          p_corrections: Json;
+          p_request_id: string;
+        };
+        Returns: string | null;
+      };
+    };
     Enums: EmptyObject;
     CompositeTypes: EmptyObject;
   };

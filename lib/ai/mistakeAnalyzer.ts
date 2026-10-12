@@ -18,6 +18,7 @@ export type MistakeAnalysis = {
 export type MistakeAnalysisInput = {
   sentence: string;
   context?: string;
+  interfaceLanguage?: string;
 };
 
 const mistakeAnalysisSchemaHint = JSON.stringify({
@@ -48,6 +49,11 @@ export async function analyzeMistake(
           "",
           "Context:",
           input.context ?? "No extra context.",
+          "",
+          `Interface language: ${input.interfaceLanguage ?? "en"}.`,
+          input.interfaceLanguage === "fa"
+            ? "The explanation may be Persian, but the corrected sentence must stay English."
+            : "The explanation should remain English.",
           "",
           "Correct the sentence if needed and explain the most important issue.",
         ].join("\n"),

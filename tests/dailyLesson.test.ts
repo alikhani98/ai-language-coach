@@ -71,6 +71,7 @@ describe("daily lesson helpers", () => {
         goal: "work",
         daily_minutes: 15,
         timezone: "Asia/Tehran",
+        interface_language: "fa",
       }),
     ).toBe(true);
     expect(
