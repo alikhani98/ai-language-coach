@@ -52,6 +52,12 @@ export async function getProfile(): Promise<UserProfile | null> {
     .maybeSingle();
 
   if (error) {
+    console.error({
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
     throw new Error(error.message);
   }
 
