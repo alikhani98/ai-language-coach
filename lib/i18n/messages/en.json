@@ -117,6 +117,37 @@
     }
   },
   "coach": {
+    "personalCoach": "Your personal English coach",
+    "dailyMotivation": "Small steps count. Let's make today's one feel good.",
+    "headerReady": "Your {minutes} minute session is ready when you are.",
+    "headerPrepare": "Make a little room for your {minutes} minute English session.",
+    "headerCompleted": "Today's session is complete. Take that confidence with you.",
+    "todayFocus": "Today's focus",
+    "skillsCovered": "Skills in this session",
+    "startSession": "Start session",
+    "prepareSession": "Prepare session",
+    "reviewSession": "Review session",
+    "today": "Today",
+    "insightTitle": "A note from your coach",
+    "insightFirst": "Start small: say one sentence aloud, even if it feels imperfect. Finding your voice takes practice, not perfection.",
+    "insightReturning": "Keep a useful phrase from your lesson in mind. Try using it in our next conversation to make it your own.",
+    "insightCompleted": "Before you move on, choose one phrase from today's lesson and say it in a sentence about your own life.",
+    "insightSaved": "Your notebook has feedback you can build on. Choose one correction and try it aloud before our next conversation.",
+    "insightAdvice": {
+      "grammar": "Your notebook includes grammar corrections. Try saying one corrected sentence aloud, then change a few words to make it your own.",
+      "vocabulary": "You have vocabulary feedback to revisit. Choose one corrected word and use it in a sentence about your day.",
+      "word_order": "Your notebook includes word-order corrections. Read one improved sentence slowly, then try the same pattern with a new idea.",
+      "tone": "Your saved feedback includes tone. Try saying the corrected phrase as if you were speaking to someone you know.",
+      "clarity": "Your notebook has feedback on clarity. Try expressing one idea in a short sentence before adding more detail.",
+      "other": "Let's build on your saved feedback. Say one corrected sentence aloud and use it as a starting point for a new one."
+    },
+    "missionTitles": {
+      "conversation": "Everyday English, more naturally",
+      "work": "Find your voice at work",
+      "travel": "English for your next adventure",
+      "exam": "Clear thoughts. Confident English.",
+      "personal_growth": "Make English part of your day"
+    },
     "home": "My coach",
     "name": "Zaban",
     "role": "Your AI English coach",

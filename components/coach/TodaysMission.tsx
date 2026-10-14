@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenText, CheckCircle2, MessageSquareText, Mic, Sparkles, Timer } from "lucide-react";
+import { ArrowRight, BookOpenText, BookText, CheckCircle2, GraduationCap, MessageSquareText, Mic, Sparkles, Timer } from "lucide-react";
 import type { DailyLesson } from "@/lib/daily/lesson";
 import { Button } from "@/components/ui/button";
 import { formatMessage, type InterfaceLanguage, type Messages } from "@/lib/i18n/config";
@@ -8,15 +8,16 @@ type TodaysMissionProps = {
   lesson: DailyLesson | null;
   minutes: number;
   level: string;
+  title: string;
   objective: string;
   language: InterfaceLanguage;
   messages: Messages;
 };
 
-const activityIcons = [BookOpenText, MessageSquareText, BookOpenText, Mic];
+const activityIcons = [BookOpenText, MessageSquareText, BookText, Mic];
 
 export function TodaysMission({
-  lesson, minutes, level, objective, language, messages,
+  lesson, minutes, level, title, objective, language, messages,
 }: TodaysMissionProps) {
   const completed = Boolean(lesson?.completed);
   const ready = lesson?.generation_status === "ready";
@@ -32,27 +33,25 @@ export function TodaysMission({
     : pending ? messages.practice.pendingBody
       : failed ? messages.practice.failedBody
         : ready ? messages.coach.missionReady : messages.coach.missionIntro;
-  const ctaLabel = completed ? messages.coach.reviewPractice
+  const ctaLabel = completed ? messages.coach.reviewSession
     : pending ? messages.dashboard.openPractice
       : failed ? messages.practice.retryButton
-        : ready ? messages.coach.startPractice : messages.practice.generateButton;
+        : ready ? messages.coach.startSession : messages.coach.prepareSession;
 
   return (
     <section aria-labelledby="mission-title" className="coach-mission rounded-xl p-5 text-white sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-xs font-medium text-white/80"><Sparkles className="h-4 w-4" />{messages.coach.mission}</p>
-        <span className="rounded-full border border-white/25 px-3 py-1 text-xs">{level}</span>
+        {completed ? <CheckCircle2 className="h-5 w-5 text-white/80" /> : <span className="text-xs text-white/75">{messages.coach.lessonType}</span>}
       </div>
-      <div className="mt-5 flex items-center gap-2 text-xs text-white/75">
-        <Timer className="h-4 w-4" />
-        {formatMessage(messages.practice.minutePractice, { minutes: number.format(minutes) })}
-        <span aria-hidden="true">·</span>
-        {messages.coach.lessonType}
+      <h2 id="mission-title" className="mt-5 max-w-md text-2xl font-semibold leading-snug sm:text-3xl">{title}</h2>
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/85">
+        <span className="flex items-center gap-2"><GraduationCap className="h-4 w-4" />{level}</span>
+        <span className="flex items-center gap-2"><Timer className="h-4 w-4" />{formatMessage(messages.practice.minutePractice, { minutes: number.format(minutes) })}</span>
       </div>
-      <p className="mt-5 text-xs text-white/75">{messages.coach.focus}</p>
-      <h2 id="mission-title" className="mt-1 text-2xl font-semibold leading-snug sm:text-3xl">{objective}</h2>
-      <p className="mt-3 hidden max-w-lg text-sm leading-7 text-white/80 sm:block">
-        {description}
+      <p className="mt-4 hidden max-w-lg text-sm leading-7 text-white/80 sm:block">{description}</p>
+      <p className="mt-4 text-xs leading-6 text-white/85">
+        <span className="text-white/65">{messages.coach.focus}: </span>{objective}
       </p>
       <Button asChild className="mt-5 min-h-14 w-full justify-between border-white bg-white px-5 text-base text-teal-950 shadow-lg shadow-black/10 hover:bg-white/90">
         <Link href="/practice">
@@ -60,7 +59,8 @@ export function TodaysMission({
           <ArrowRight className="h-5 w-5 rtl:rotate-180" />
         </Link>
       </Button>
-      <div className="mt-5 grid grid-cols-4 gap-2 border-y border-white/15 py-4">
+      <p className="mt-5 text-xs font-medium text-white/75">{messages.coach.skillsCovered}</p>
+      <div className="mt-3 grid grid-cols-4 gap-2 border-b border-white/15 pb-4">
         {messages.dashboard.activities.map((activity, index) => {
           const Icon = activityIcons[index];
           return (
@@ -71,7 +71,7 @@ export function TodaysMission({
           );
         })}
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-white/80">
+      <div className="mission-status mt-4 flex items-center justify-between gap-3 text-xs text-white/80">
         <span className="flex items-center gap-2">{completed ? <CheckCircle2 className="h-4 w-4" /> : null}{status}</span>
         <span>{percent.format(completed ? 1 : 0)}</span>
       </div>

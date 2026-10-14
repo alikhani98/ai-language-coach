@@ -78,15 +78,54 @@
 }
 
 @layer components {
+  .coach-home-grid {
+    display: grid;
+    grid-template-areas: "greeting" "mission" "insight" "rhythm" "actions";
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .coach-home-greeting { grid-area: greeting; }
+  .coach-home-mission { grid-area: mission; min-width: 0; }
+  .coach-home-insight { grid-area: insight; min-width: 0; }
+  .coach-home-rhythm { grid-area: rhythm; min-width: 0; }
+  .coach-home-actions { grid-area: actions; min-width: 0; }
+
+  .coach-insight-bubble {
+    box-shadow: 0 4px 20px hsl(var(--foreground) / 0.035);
+  }
+
+  .dark .coach-insight-bubble {
+    background: hsl(210 8% 13%);
+    border-color: hsl(210 7% 26%);
+  }
+
+  @media (min-width: 1024px) {
+    .coach-home-grid {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      grid-template-areas: "greeting mission" "rhythm mission" "insight actions";
+      column-gap: 3rem;
+      row-gap: 2rem;
+    }
+
+    .coach-home-mission { align-self: stretch; }
+    .coach-home-mission .coach-mission {
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+    }
+    .coach-home-mission .mission-status { margin-top: auto; padding-top: 1.5rem; }
+  }
+
   .coach-mission {
-    background: linear-gradient(125deg, hsl(173 48% 24%), hsl(193 42% 17%));
-    box-shadow: 0 12px 32px hsl(var(--primary) / 0.12);
+    background: linear-gradient(135deg, hsl(164 48% 28%), hsl(174 46% 22%) 48%, hsl(191 38% 18%));
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.12), 0 16px 36px -12px hsl(174 40% 20% / 0.3);
     animation: coach-arrive 400ms ease-out both;
   }
 
   .dark .coach-mission {
-    background: linear-gradient(125deg, hsl(173 40% 19%), hsl(193 32% 13%));
-    border: 1px solid hsl(174 35% 32%);
+    background: linear-gradient(135deg, hsl(165 35% 23%), hsl(177 34% 18%) 48%, hsl(193 28% 14%));
+    border: 1px solid hsl(174 25% 32%);
   }
 
   .section-surface {
