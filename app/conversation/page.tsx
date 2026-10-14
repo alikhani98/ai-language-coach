@@ -34,7 +34,7 @@ export default async function ConversationPage({
         eyebrow={messages.conversation.eyebrow}
         title={messages.nav.conversation}
       />
-      <p className="border-s-2 border-primary/30 ps-4 text-sm leading-7"><span className="font-semibold text-primary">{messages.intelligence.coachFocus}: </span>{focus}</p>
+      <p className="border-s-2 border-primary/30 ps-4 text-sm type-copy"><span className="font-semibold text-primary">{messages.intelligence.coachFocus}: </span>{focus}</p>
       <ConversationWorkspace
         initialThread={initialThread}
         recentConversations={recentConversations}

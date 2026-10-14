@@ -13,7 +13,7 @@
     --secondary: 180 16% 94%;
     --secondary-foreground: 222 20% 14%;
     --muted: 210 16% 95%;
-    --muted-foreground: 225 10% 42%;
+    --muted-foreground: 225 10% 39%;
     --accent: 199 35% 90%;
     --accent-foreground: 204 42% 20%;
     --destructive: 0 74% 42%;
@@ -34,7 +34,7 @@
     --secondary: 210 8% 17%;
     --secondary-foreground: 210 14% 94%;
     --muted: 210 8% 17%;
-    --muted-foreground: 218 12% 68%;
+    --muted-foreground: 218 12% 72%;
     --accent: 199 24% 22%;
     --accent-foreground: 198 42% 88%;
     --destructive: 0 80% 72%;
@@ -48,11 +48,59 @@
     @apply border-border;
   }
 
+  /* Locale tokens also apply to nested language scopes, such as onboarding. */
+  :root,
+  [lang="en"] {
+    --font-ui: var(--font-latin), var(--font-persian);
+    --text-caption: 0.75rem;
+    --text-small: 0.875rem;
+    --leading-copy: 1.75;
+    --leading-label: 1.65;
+    --leading-heading: 1.35;
+    --tracking-heading: -0.025em;
+  }
+
+  [lang="fa"] {
+    --font-ui: var(--font-persian), var(--font-latin);
+    --text-caption: 0.8125rem;
+    --text-small: 0.9375rem;
+    --leading-copy: 1.95;
+    --leading-label: 1.85;
+    --leading-heading: 1.6;
+    --tracking-heading: 0;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-    line-height: 1.6;
-    overflow-wrap: anywhere;
+    font-family: var(--font-ui), sans-serif;
+    line-height: var(--leading-copy);
+    overflow-wrap: break-word;
+    font-kerning: normal;
+    font-optical-sizing: auto;
+  }
+
+  [lang] {
+    font-family: var(--font-ui), sans-serif;
+  }
+
+  :is(h1, h2, h3) {
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :is(button, input, textarea, select) {
+    font-family: inherit;
+    letter-spacing: inherit;
+  }
+
+  :is(input, textarea)::placeholder {
+    font-family: var(--font-ui), sans-serif;
+    opacity: 1;
   }
 
   html {
@@ -61,11 +109,6 @@
 
   :is(a, button, select, summary, textarea, input):focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-
-  [lang="fa"] body {
-    font-family: Tahoma, Arial, sans-serif;
-    line-height: 1.85;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -78,6 +121,63 @@
 }
 
 @layer components {
+  .type-display {
+    font-size: clamp(1.875rem, 1.4rem + 1.6vw, 2.5rem);
+    font-weight: 600;
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
+  }
+
+  .type-title {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);
+    font-weight: 600;
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
+  }
+
+  .type-section {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: var(--leading-heading);
+  }
+
+  .type-copy {
+    line-height: var(--leading-copy);
+  }
+
+  .type-label {
+    line-height: var(--leading-label);
+  }
+
+  .type-coach {
+    max-width: 38rem;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: var(--leading-copy);
+  }
+
+  .type-number {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    unicode-bidi: isolate;
+  }
+
+  .inline-name {
+    display: inline;
+    font-family: var(--font-latin), var(--font-persian), sans-serif;
+    font-size: 0.9em;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+    letter-spacing: 0;
+  }
+
+  .nav-label {
+    line-height: var(--leading-label);
+    text-wrap: balance;
+  }
+
   .coach-home-grid {
     display: grid;
     grid-template-areas: "greeting" "mission" "insight" "rhythm" "actions";
@@ -129,7 +229,7 @@
   }
 
   .section-surface {
-    @apply border-y bg-card px-5 py-6 sm:px-6;
+    @apply rounded-xl border bg-card px-5 py-6 sm:px-7 sm:py-7;
   }
 
   .quiet-row {

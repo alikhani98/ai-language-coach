@@ -47,10 +47,10 @@ export function PracticeWorkspace({
   const progressLabel = useMemo(
     () =>
       formatMessage(messages.practice.progressLabel, {
-        current: step + 1,
-        total: sectionKeys.length,
+        current: new Intl.NumberFormat(language).format(step + 1),
+        total: new Intl.NumberFormat(language).format(sectionKeys.length),
       }),
-    [messages, step],
+    [messages, step, language],
   );
 
   if (!lesson) {
@@ -60,10 +60,10 @@ export function PracticeWorkspace({
           <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary"><Sparkles className="h-6 w-6" /></span>
           <p className="text-sm font-medium text-muted-foreground">
             {formatMessage(messages.practice.minutePractice, {
-              minutes: dailyMinutes,
+              minutes: new Intl.NumberFormat(language).format(dailyMinutes),
             })}
           </p>
-          <h1 className="text-2xl font-semibold">
+          <h1 className="type-title">
             {messages.practice.generateTitle}
           </h1>
           <p className="text-muted-foreground">
@@ -87,7 +87,7 @@ export function PracticeWorkspace({
     return (
       <section className="section-surface" aria-live="polite">
         <LoaderCircle className="mb-5 h-6 w-6 animate-spin text-primary" />
-        <h1 className="text-2xl font-semibold">
+        <h1 className="type-title">
           {messages.practice.pendingTitle}
         </h1>
         <p className="mt-3 text-muted-foreground">
@@ -101,7 +101,7 @@ export function PracticeWorkspace({
   if (lesson.generation_status === "failed") {
     return (
       <section className="section-surface">
-        <h1 className="text-2xl font-semibold">
+        <h1 className="type-title">
           {messages.practice.failedTitle}
         </h1>
         <p className="mt-3 text-muted-foreground">
@@ -128,10 +128,10 @@ export function PracticeWorkspace({
             <p className="text-sm font-medium text-muted-foreground">
               {progressLabel} ·{" "}
               {formatMessage(messages.practice.minutePractice, {
-                minutes: dailyMinutes,
+                minutes: new Intl.NumberFormat(language).format(dailyMinutes),
               })}
             </p>
-            <h1 className="mt-1 text-2xl font-semibold">
+            <h1 className="mt-1 type-title">
               {messages.practice.sections[step]}
             </h1>
           </div>
@@ -221,12 +221,12 @@ export function PracticeWorkspace({
 
 function Vocabulary({ lesson }: { lesson: DailyLesson }) {
   return (
-    <div dir="ltr" className="grid gap-4 text-left sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2">
       {lesson.words.map((item) => (
         <Card key={item.word} className="p-5">
-          <h2 className="text-xl font-semibold text-primary">{item.word}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{item.meaning}</p>
-          <p className="mt-4 border-t pt-4 text-sm leading-7">{item.example}</p>
+          <h2 lang="en" dir="ltr" className="text-left text-xl font-semibold text-primary">{item.word}</h2>
+          <p dir="auto" className="mt-2 text-sm text-muted-foreground">{item.meaning}</p>
+          <p lang="en" dir="ltr" className="mt-4 border-t pt-4 text-left text-sm type-copy">{item.example}</p>
         </Card>
       ))}
     </div>
@@ -242,7 +242,7 @@ function Sentence({
 }) {
   return (
     <div className="border-s-2 border-primary/40 py-3 ps-5 sm:ps-8">
-      <p dir="ltr" className="text-left text-2xl font-medium leading-relaxed">{lesson.sentence}</p>
+      <p lang="en" dir="ltr" className="text-left text-2xl font-medium leading-relaxed">{lesson.sentence}</p>
       <p className="mt-4 text-sm text-muted-foreground">
         {messages.practice.sentenceHint}
       </p>
@@ -252,7 +252,7 @@ function Sentence({
 
 function Reading({ lesson }: { lesson: DailyLesson }) {
   return (
-    <article dir="ltr" className="max-w-2xl py-3 text-left">
+    <article lang="en" dir="ltr" className="max-w-2xl py-3 text-left">
       <p className="whitespace-pre-line text-base leading-8">{lesson.reading_text}</p>
     </article>
   );
@@ -267,7 +267,7 @@ function Speaking({
 }) {
   return (
     <div className="border-s-2 border-primary/40 py-3 ps-5 sm:ps-8">
-      <p dir="ltr" className="text-left text-xl font-medium leading-8">{lesson.speaking_task}</p>
+      <p lang="en" dir="ltr" className="text-left text-xl font-medium leading-8">{lesson.speaking_task}</p>
       <p className="mt-4 text-sm text-muted-foreground">
         {messages.practice.speakingHint}
       </p>

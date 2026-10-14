@@ -35,13 +35,13 @@ export function NavigationLinks({ items, mobile = false }: MobileNavProps & { mo
             href={item.href}
             className={cn(
               "flex items-center justify-center rounded-lg font-medium transition-colors hover:bg-secondary hover:text-foreground",
-              mobile ? "min-h-14 flex-col gap-1 px-1 text-xs" : "min-h-11 gap-2 px-3 text-sm",
+              mobile ? "min-h-14 flex-col gap-1 px-1 py-1.5 text-xs" : "min-h-11 gap-2 px-3 text-sm",
               active ? "bg-secondary text-primary" : "text-muted-foreground",
             )}
             aria-current={active ? "page" : undefined}
           >
             <Icon aria-hidden="true" className={cn("h-5 w-5 shrink-0", active && "stroke-[2.5]")} />
-            <span className="max-w-full">{item.label}</span>
+            <span className="nav-label max-w-full">{item.label}</span>
           </Link>
           );
         })}

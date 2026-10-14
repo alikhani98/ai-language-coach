@@ -38,7 +38,7 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
               aria-current={params.category === category ? "page" : undefined}
               className={`inline-flex min-h-11 items-center rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:border-primary/50 ${params.category === category ? "border-primary/30 bg-primary/10 text-primary" : "bg-card text-muted-foreground"}`}
             >
-              {category}
+              <bdi>{messages.coach.categories[category as keyof typeof messages.coach.categories] ?? category}</bdi>
             </a>
           ))}
         </div>
@@ -48,6 +48,8 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
         mistakes={notebook.mistakes}
         groups={notebook.groups}
         messages={messages}
+        language={profile.interface_language}
+        timezone={profile.timezone}
       />
     </section>
   );

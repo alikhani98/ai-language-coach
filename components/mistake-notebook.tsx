@@ -17,12 +17,16 @@ type MistakeNotebookProps = {
   mistakes: Mistake[];
   groups: MistakeGroup[];
   messages: Messages;
+  language: string;
+  timezone: string;
 };
 
 export function MistakeNotebook({
   mistakes,
   groups,
   messages,
+  language,
+  timezone,
 }: MistakeNotebookProps) {
   const [syncState, syncAction, isSyncing] = useActionState(
     syncConversationCorrectionsAction,
@@ -33,7 +37,7 @@ export function MistakeNotebook({
   return (
     <div className="space-y-6">
       <AICoachMessage name={messages.coach.name} label={messages.coach.role} message={messages.coach.notebookMessage} />
-      <section className="flex items-center justify-between gap-4 border-b pb-5">
+      <section className="flex flex-wrap items-center justify-between gap-4 border-b pb-5">
         <div>
           <h2 className="text-sm font-semibold">
             {messages.mistakes.conversationCorrections}
@@ -75,7 +79,7 @@ export function MistakeNotebook({
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-medium">{messages.coach.categories[group.category as keyof typeof messages.coach.categories] ?? group.category}</p>
                   <span className="text-sm text-muted-foreground">
-                    {group.count}{" "}
+                    {new Intl.NumberFormat(language).format(group.count)}{" "}
                     {group.count === 1
                       ? messages.mistakes.time
                       : messages.mistakes.times}
@@ -85,13 +89,13 @@ export function MistakeNotebook({
                   <span className="text-muted-foreground">
                     {messages.mistakes.original}
                   </span>{" "}
-                  <bdi>{group.wrong_sentence}</bdi>
+                  <bdi lang="en">{group.wrong_sentence}</bdi>
                 </p>
                 <p className="mt-1 text-sm">
                   <span className="text-muted-foreground">
                     {messages.mistakes.correct}
                   </span>{" "}
-                  <bdi className="font-medium text-primary">{group.correct_sentence}</bdi>
+                  <bdi lang="en" className="font-medium text-primary">{group.correct_sentence}</bdi>
                 </p>
               </div>
             ))
@@ -132,11 +136,11 @@ export function MistakeNotebook({
                 <div className="mt-5 space-y-4">
                   <div>
                     <p className="mb-1 text-xs text-muted-foreground">{messages.mistakes.original}</p>
-                    <p dir="auto" className="text-sm leading-7 text-muted-foreground line-through decoration-destructive/40">{mistake.wrong_sentence}</p>
+                    <p lang="en" dir="auto" className="text-sm type-copy text-muted-foreground line-through decoration-destructive/40">{mistake.wrong_sentence}</p>
                   </div>
                   <div className="border-s-2 border-primary/40 ps-3">
                     <p className="mb-1 text-xs text-primary">{messages.mistakes.correct}</p>
-                    <p dir="auto" className="text-base font-medium leading-7">{mistake.correct_sentence}</p>
+                    <p lang="en" dir="auto" className="text-base font-medium type-copy">{mistake.correct_sentence}</p>
                   </div>
                 </div>
                 <details className="group mt-5 border-t pt-2">
@@ -146,11 +150,11 @@ export function MistakeNotebook({
                   </summary>
                   <div className="space-y-3 pb-3 pt-2">
                     <p className="text-xs font-semibold">{messages.coach.why}</p>
-                    <p dir="auto" className="text-sm leading-7 text-muted-foreground">{mistake.explanation}</p>
-                    <p className="border-s-2 border-primary/30 ps-3 text-sm leading-7">{messages.coach.reviewHint}</p>
+                    <p dir="auto" className="text-sm type-copy text-muted-foreground">{mistake.explanation}</p>
+                    <p className="border-s-2 border-primary/30 ps-3 text-sm type-copy">{messages.coach.reviewHint}</p>
                   </div>
                 </details>
-                <p className="mt-2 text-xs tabular-nums text-muted-foreground">{new Date(mistake.created_at).toLocaleDateString()}</p>
+                <p className="mt-2 text-xs tabular-nums text-muted-foreground">{new Date(mistake.created_at).toLocaleDateString(language, { timeZone: timezone })}</p>
               </article>
             ))
           ) : (

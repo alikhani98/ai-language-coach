@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AppNav } from "@/components/app-nav";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -6,6 +7,22 @@ import { getCurrentUser } from "@/lib/auth/user";
 import { getProfile } from "@/lib/actions/profile";
 import { getTextDirection, resolveInterfaceLanguage } from "@/lib/i18n/config";
 import { resolveThemePreference } from "@/lib/theme/config";
+
+const persian = localFont({
+  src: "./fonts/vazirmatn-variable.woff2",
+  variable: "--font-persian",
+  weight: "100 900",
+  display: "swap",
+  fallback: ["Tahoma", "Arial"],
+});
+
+const latin = localFont({
+  src: "./fonts/inter-variable.woff2",
+  variable: "--font-latin",
+  weight: "100 900",
+  display: "swap",
+  fallback: ["Arial", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   title: "AI Language Coach",
@@ -41,6 +58,7 @@ export default async function RootLayout({
     <html
       lang={language}
       dir={getTextDirection(language)}
+      className={`${persian.variable} ${latin.variable}`}
       suppressHydrationWarning
     >
       <head>

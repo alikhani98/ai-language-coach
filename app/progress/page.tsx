@@ -47,7 +47,7 @@ export default async function ProgressPage() {
                 >
                   <span className="font-medium">{messages.conversation.topics[topic.topic as keyof typeof messages.conversation.topics] ?? topic.topic.replaceAll("_", " ")}</span>
                   <span className="text-muted-foreground">
-                    {topic.count}{" "}
+                    {new Intl.NumberFormat(profile.interface_language).format(topic.count)}{" "}
                     {topic.count === 1
                       ? messages.progress.conversation
                       : messages.progress.conversations}
@@ -71,7 +71,7 @@ export default async function ProgressPage() {
                 >
                   <span>{messages.coach.categories[area.category as keyof typeof messages.coach.categories] ?? area.category}</span>
                   <span className="text-muted-foreground">
-                    {area.count}{" "}
+                    {new Intl.NumberFormat(profile.interface_language).format(area.count)}{" "}
                     {area.count === 1
                       ? messages.progress.correction
                       : messages.progress.corrections}
@@ -100,7 +100,7 @@ export default async function ProgressPage() {
                     : messages.progress.conversation}
                 </span>
                 <span className="text-xs tabular-nums text-muted-foreground">
-                  {activity.occurred_at}
+                  {new Intl.DateTimeFormat(profile.interface_language, { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${activity.occurred_at}T12:00:00Z`))}
                 </span>
               </div>
             ))

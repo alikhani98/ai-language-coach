@@ -32,13 +32,13 @@ export function AICoachMessage({ name, label, message, advice, className }: AICo
   return (
     <aside className={cn("flex items-start gap-4", className)}>
       <CoachAvatar />
-      <div className="min-w-0 space-y-2">
+      <div className="min-w-0 space-y-3">
         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
           <span className="font-semibold">{name}</span>
           <span className="text-xs text-muted-foreground">{label}</span>
         </p>
-        <p className="max-w-xl text-base font-medium leading-7">{message}</p>
-        {advice ? <p className="max-w-xl text-sm leading-7 text-muted-foreground">{advice}</p> : null}
+        <p className="type-coach">{message}</p>
+        {advice ? <p className="max-w-xl text-sm type-copy text-muted-foreground">{advice}</p> : null}
       </div>
     </aside>
   );

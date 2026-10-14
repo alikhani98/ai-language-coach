@@ -20,7 +20,7 @@ export default async function PracticePage() {
         title={messages.practice.heading}
         description={messages.practice.body}
       />
-      <p className="border-s-2 border-primary/30 ps-4 text-sm leading-7"><span className="font-semibold text-primary">{messages.intelligence.personalized}: </span>{focus}</p>
+      <p className="border-s-2 border-primary/30 ps-4 text-sm type-copy"><span className="font-semibold text-primary">{messages.intelligence.personalized}: </span>{focus}</p>
       <PracticeWorkspace
         initialLesson={lesson}
         dailyMinutes={profile.daily_minutes}

@@ -10,6 +10,20 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-ui)", "sans-serif"],
+        latin: ["var(--font-latin)", "var(--font-persian)", "sans-serif"],
+      },
+      fontSize: {
+        xs: ["var(--text-caption)", { lineHeight: "var(--leading-label)" }],
+        sm: ["var(--text-small)", { lineHeight: "var(--leading-copy)" }],
+        base: ["1rem", { lineHeight: "var(--leading-copy)" }],
+        lg: ["1.125rem", { lineHeight: "var(--leading-heading)" }],
+        xl: ["1.25rem", { lineHeight: "var(--leading-heading)" }],
+        "2xl": ["1.5rem", { lineHeight: "var(--leading-heading)" }],
+        "3xl": ["1.875rem", { lineHeight: "var(--leading-heading)" }],
+        "4xl": ["2.25rem", { lineHeight: "var(--leading-heading)" }],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

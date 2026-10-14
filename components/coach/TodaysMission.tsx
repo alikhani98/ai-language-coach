@@ -44,14 +44,14 @@ export function TodaysMission({
         <p className="flex items-center gap-2 text-xs font-medium text-white/80"><Sparkles className="h-4 w-4" />{messages.coach.mission}</p>
         {completed ? <CheckCircle2 className="h-5 w-5 text-white/80" /> : <span className="text-xs text-white/75">{messages.coach.lessonType}</span>}
       </div>
-      <h2 id="mission-title" className="mt-5 max-w-md text-2xl font-semibold leading-snug sm:text-3xl">{title}</h2>
+      <h2 id="mission-title" className="mt-5 max-w-md type-title">{title}</h2>
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/85">
-        <span className="flex items-center gap-2"><GraduationCap className="h-4 w-4" />{level}</span>
+        <span className="flex items-center gap-2"><GraduationCap className="h-4 w-4 shrink-0" /><bdi>{level}</bdi></span>
         <span className="flex items-center gap-2"><Timer className="h-4 w-4" />{formatMessage(messages.practice.minutePractice, { minutes: number.format(minutes) })}</span>
       </div>
-      <p className="mt-4 hidden max-w-lg text-sm leading-7 text-white/80 sm:block">{description}</p>
-      <p className="mt-4 text-xs leading-6 text-white/85">
-        <span className="text-white/65">{messages.coach.focus}: </span>{objective}
+      <p className="mt-4 hidden max-w-lg text-sm type-copy text-white/80 sm:block">{description}</p>
+      <p className="mt-4 text-xs type-copy text-white/85">
+        <span className="text-white/80">{messages.coach.focus}: </span>{objective}
       </p>
       <Button asChild className="mt-5 min-h-14 w-full justify-between border-white bg-white px-5 text-base text-teal-950 shadow-lg shadow-black/10 hover:bg-white/90">
         <Link href="/practice">

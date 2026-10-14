@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { createProfile } from "@/lib/actions/profile";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 import type { ProfileInput } from "@/lib/validations/profile";
 import { getMessages, type InterfaceLanguage } from "@/lib/i18n/config";
@@ -94,105 +95,113 @@ export function OnboardingForm() {
   }, [messages, step]);
 
   return (
-    <Card dir={interfaceLanguage === "fa" ? "rtl" : "ltr"} className="mx-auto max-w-2xl p-5 sm:p-8">
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">
-          {messages.onboarding.step
-            .replace("{current}", String(step + 1))
-            .replace("{total}", String(steps.length))}
-        </p>
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        <div className="grid grid-cols-4 gap-2 pt-2">
-          {steps.map((label, index) => (
-            <div key={label} className="space-y-2">
-              <div
-                className={cn(
-                  "h-1 rounded-full bg-muted",
-                  index <= step && "bg-primary",
-                )}
-              />
-              <p className="text-xs text-muted-foreground">{label}</p>
-            </div>
-          ))}
+    <section lang={interfaceLanguage} dir={interfaceLanguage === "fa" ? "rtl" : "ltr"} className="space-y-6">
+      <PageHeader
+        eyebrow={messages.onboarding.eyebrow}
+        title={messages.onboarding.heading}
+        description={messages.onboarding.body}
+        className="mx-auto max-w-2xl"
+      />
+      <Card className="mx-auto max-w-2xl p-5 sm:p-8">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            {messages.onboarding.step
+              .replace("{current}", new Intl.NumberFormat(interfaceLanguage).format(step + 1))
+              .replace("{total}", new Intl.NumberFormat(interfaceLanguage).format(steps.length))}
+          </p>
+          <h1 className="type-title">{title}</h1>
+          <div className="grid grid-cols-4 gap-2 pt-2">
+            {steps.map((label, index) => (
+              <div key={label} className="space-y-2">
+                <div
+                  className={cn(
+                    "h-1 rounded-full bg-muted",
+                    index <= step && "bg-primary",
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {state.error ? (
-        <p role="alert" className="mt-5 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {state.error}
-        </p>
-      ) : null}
-
-      <form action={formAction} className="mt-6 space-y-6">
-        <input type="hidden" name="level" value={level} />
-        <input type="hidden" name="goal" value={goal} />
-        <input type="hidden" name="daily_minutes" value={dailyMinutes} />
-        <input type="hidden" name="timezone" value={timezone} />
-        <input
-          type="hidden"
-          name="interface_language"
-          value={interfaceLanguage}
-        />
-
-        {step === 0 ? (
-          <OptionGrid
-            options={levelOptions}
-            value={level}
-            onChange={setLevel}
-          />
+        {state.error ? (
+          <p role="alert" className="mt-5 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {state.error}
+          </p>
         ) : null}
 
-        {step === 1 ? (
-          <OptionGrid options={goalOptions} value={goal} onChange={setGoal} />
-        ) : null}
-
-        {step === 2 ? (
-          <OptionGrid
-            options={timeOptions}
-            value={dailyMinutes}
-            onChange={setDailyMinutes}
-          />
-        ) : null}
-
-        {step === 3 ? (
-          <OptionGrid
-            options={languageOptions}
+        <form action={formAction} className="mt-6 space-y-6">
+          <input type="hidden" name="level" value={level} />
+          <input type="hidden" name="goal" value={goal} />
+          <input type="hidden" name="daily_minutes" value={dailyMinutes} />
+          <input type="hidden" name="timezone" value={timezone} />
+          <input
+            type="hidden"
+            name="interface_language"
             value={interfaceLanguage}
-            onChange={setInterfaceLanguage}
           />
-        ) : null}
 
-        <div className="flex items-center justify-between gap-3 border-t pt-5">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!canGoBack || isPending}
-            onClick={() => setStep((current) => Math.max(0, current - 1))}
-          >
-                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-            {messages.common.back}
-          </Button>
+          {step === 0 ? (
+            <OptionGrid
+              options={levelOptions}
+              value={level}
+              onChange={setLevel}
+            />
+          ) : null}
 
-          {isLastStep ? (
-            <Button type="submit" disabled={isPending}>
-              {isPending ? messages.common.saving : messages.onboarding.startPractice}
-              <Check className="h-4 w-4" />
-            </Button>
-          ) : (
+          {step === 1 ? (
+            <OptionGrid options={goalOptions} value={goal} onChange={setGoal} />
+          ) : null}
+
+          {step === 2 ? (
+            <OptionGrid
+              options={timeOptions}
+              value={dailyMinutes}
+              onChange={setDailyMinutes}
+            />
+          ) : null}
+
+          {step === 3 ? (
+            <OptionGrid
+              options={languageOptions}
+              value={interfaceLanguage}
+              onChange={setInterfaceLanguage}
+            />
+          ) : null}
+
+          <div className="flex items-center justify-between gap-3 border-t pt-5">
             <Button
               type="button"
-              disabled={isPending}
-              onClick={() =>
-                setStep((current) => Math.min(steps.length - 1, current + 1))
-              }
+              variant="outline"
+              disabled={!canGoBack || isPending}
+              onClick={() => setStep((current) => Math.max(0, current - 1))}
             >
-              {messages.common.continue}
-              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+              {messages.common.back}
             </Button>
-          )}
-        </div>
-      </form>
-    </Card>
+
+            {isLastStep ? (
+              <Button type="submit" disabled={isPending}>
+                {isPending ? messages.common.saving : messages.onboarding.startPractice}
+                <Check className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                disabled={isPending}
+                onClick={() =>
+                  setStep((current) => Math.min(steps.length - 1, current + 1))
+                }
+              >
+                {messages.common.continue}
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              </Button>
+            )}
+          </div>
+        </form>
+      </Card>
+    </section>
   );
 }
 
@@ -224,7 +233,7 @@ function OptionGrid<T extends string | number>({
             onClick={() => onChange(option.value)}
           >
             <span>
-              <span className="block font-medium">{option.label}</span>
+              <bdi className="block font-medium">{option.label}</bdi>
               {option.description ? (
                 <span className="mt-1 block text-sm text-muted-foreground">
                   {option.description}

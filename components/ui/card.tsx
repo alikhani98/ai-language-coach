@@ -20,7 +20,7 @@ export function CardHeader({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("space-y-1.5 p-5 sm:p-6", className)} {...props} />;
+  return <div className={cn("space-y-3 p-5 sm:p-6", className)} {...props} />;
 }
 
 export function CardContent({

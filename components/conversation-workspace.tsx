@@ -155,11 +155,12 @@ export function ConversationWorkspace({
             error={error}
             success={success}
             messages={ui}
+            language={language}
           />
         ) : (
           <div className="flex min-h-72 flex-col justify-center gap-6 px-1 sm:px-4">
             <AICoachMessage name={ui.coach.name} label={ui.coach.role} message={ui.conversation.emptyTitle} advice={ui.conversation.emptyBody} />
-            <p className="border-s-2 border-primary/25 ps-4 text-sm leading-7 text-muted-foreground">{ui.coach.conversationObjective}</p>
+            <p className="border-s-2 border-primary/25 ps-4 text-sm type-copy text-muted-foreground">{ui.coach.conversationObjective}</p>
           </div>
         )}
       </Card>
@@ -181,6 +182,7 @@ function ConversationPanel({
   error,
   success,
   messages,
+  language,
 }: {
   thread: ConversationThread;
   threadMessages: ConversationMessage[];
@@ -195,6 +197,7 @@ function ConversationPanel({
   error?: string;
   success?: string;
   messages: Messages;
+  language: string;
 }) {
   const isEnded = thread.conversation.status === "ended";
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -244,7 +247,7 @@ function ConversationPanel({
           </Button>
         </form>
       </div>
-      <p className="border-b py-3 text-xs leading-6 text-muted-foreground">{messages.coach.conversationObjective}</p>
+      <p className="border-b py-3 text-xs type-copy text-muted-foreground">{messages.coach.conversationObjective}</p>
 
       <div ref={scrollRef} role="log" aria-label={messages.conversation.coach} aria-live="polite" className="h-[clamp(9rem,25svh,24rem)] flex-none space-y-5 overflow-y-auto overscroll-contain py-5 pe-1 sm:h-[52svh]">
         {threadMessages.length ? (
@@ -289,7 +292,7 @@ function ConversationPanel({
           disabled={isEnded || isSending}
           maxLength={800}
           rows={2}
-          className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-base leading-7 outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+          className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 font-latin text-base type-copy outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={
             isEnded
               ? messages.conversation.endedPlaceholder
@@ -297,7 +300,7 @@ function ConversationPanel({
           }
         />
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">{text.length}/800</p>
+          <p className="type-number text-xs text-muted-foreground"><bdi dir="ltr">{new Intl.NumberFormat(language).format(text.length)} / {new Intl.NumberFormat(language).format(800)}</bdi></p>
           <Button type="submit" disabled={!canSend}>
             {isSending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 rtl:-scale-x-100" />}
             {isSending ? messages.conversation.sending : messages.conversation.send}
@@ -324,17 +327,17 @@ function MessageBubble({
         className={cn(
           "min-w-0 rounded-xl p-4 sm:p-5",
           isUser
-            ? "max-w-[90%] rounded-br-md bg-primary text-primary-foreground rtl:rounded-bl-md rtl:rounded-br-2xl"
-            : "max-w-[calc(100%-3rem)] rounded-bl-md bg-muted/65 rtl:rounded-bl-2xl rtl:rounded-br-md",
+            ? "max-w-[90%] rounded-ee-md bg-primary text-primary-foreground"
+            : "max-w-[calc(100%-3rem)] rounded-es-md bg-muted/65",
         )}
       >
-        <p dir="auto" className="whitespace-pre-line text-sm leading-7">{message.content}</p>
+        <p dir="auto" className="whitespace-pre-line font-latin text-sm type-copy">{message.content}</p>
         {!isUser && message.corrections.length ? (
           <div className="mt-4 space-y-2">
             {message.corrections.map((correction) => (
               <aside
                 key={`${correction.original}-${correction.corrected}`}
-                className="border-t border-primary/20 pt-4 text-sm leading-7"
+                className="border-t border-primary/20 pt-4 text-sm type-copy"
               >
                 <p className="mb-3 flex flex-wrap items-center gap-2 text-xs font-medium text-primary">
                   <Check className="h-3.5 w-3.5" />{messages.coach.correctionTitle}
@@ -344,13 +347,13 @@ function MessageBubble({
                   <span className="text-muted-foreground">
                     {messages.conversation.original}
                   </span>{" "}
-                  <bdi className="text-muted-foreground line-through decoration-destructive/40">{correction.original}</bdi>
+                  <bdi lang="en" className="text-muted-foreground line-through decoration-destructive/40">{correction.original}</bdi>
                 </p>
                 <p className="mt-1">
                   <span className="text-muted-foreground">
                     {messages.conversation.better}
                   </span>{" "}
-                  <bdi className="font-medium text-primary">{correction.corrected}</bdi>
+                  <bdi lang="en" className="font-medium text-primary">{correction.corrected}</bdi>
                 </p>
                 <details className="group mt-2">
                   <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold text-primary [&::-webkit-details-marker]:hidden">

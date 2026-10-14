@@ -9,7 +9,7 @@ export function AIProgressSummary({ summary, messages }: { summary: ProgressSumm
         {(["vocabulary", "grammar", "speaking", "tomorrow"] as const).map((key) => (
           <div key={key}>
             <dt className="text-xs font-semibold text-muted-foreground">{messages.intelligence[key]}</dt>
-            <dd dir="auto" className="mt-1 text-sm leading-7">{summary[key]}</dd>
+            <dd dir="auto" className="mt-1 text-sm type-copy">{summary[key]}</dd>
           </div>
         ))}
       </dl>

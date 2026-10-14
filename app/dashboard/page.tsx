@@ -41,17 +41,22 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground">{messages.coach.personalCoach}</p>
           </div>
         </div>
-        <h1 id="personal-coach-title" className="mt-4 text-2xl font-semibold leading-snug sm:text-3xl">
-          {formatMessage(messages.dashboard.greeting, { name: displayName })}
+        <h1 id="personal-coach-title" className="type-display mt-5">
+          {messages.dashboard.greeting.split("{name}").map((part, index) => (
+            <span key={index}>
+              {index > 0 ? <bdi className="inline-name">{displayName}</bdi> : null}
+              {part}
+            </span>
+          ))}
         </h1>
-        <p className="mt-2 max-w-md text-sm leading-7 text-muted-foreground">
+        <p className="mt-4 max-w-md text-sm type-copy text-muted-foreground">
           {formatMessage(intro, { minutes: new Intl.NumberFormat(profile.interface_language).format(profile.daily_minutes) })}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">{level}</span>
-          <p className="text-xs leading-6"><span className="text-muted-foreground">{messages.coach.todayFocus}: </span>{objective}</p>
+          <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary"><bdi>{level}</bdi></span>
+          <p className="text-xs type-copy"><span className="text-muted-foreground">{messages.coach.todayFocus}: </span>{objective}</p>
         </div>
-        <p className="mt-3 max-w-md text-xs leading-6 text-muted-foreground">{messages.coach.dailyMotivation}</p>
+        <p className="mt-3 max-w-md text-xs type-copy text-muted-foreground">{messages.coach.dailyMotivation}</p>
       </section>
 
       <div className="coach-home-mission">
@@ -97,7 +102,7 @@ export default async function DashboardPage() {
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border bg-card text-primary transition-colors group-hover:border-primary/30 group-hover:bg-primary/5"><Icon className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-semibold">{title}</h3>
-              <p className="mt-1 text-xs leading-6 text-muted-foreground">{body}</p>
+              <p className="mt-1 text-xs type-copy text-muted-foreground">{body}</p>
             </div>
             <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
           </Link>

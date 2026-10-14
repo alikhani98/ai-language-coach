@@ -32,7 +32,7 @@ export function CoachInsight({ category, hasPractice, completed, messages }: Coa
         <h2 id="coach-insight-title" className="text-xs font-semibold text-primary">
           {messages.coach.insightTitle}
         </h2>
-        <p className="mt-2 text-sm leading-7">{message}</p>
+        <p className="mt-3 text-sm type-copy">{message}</p>
         <Link href={href} className="mt-2 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-primary">
           {category ? messages.coach.reviewLesson : messages.nav.conversation}
           <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />

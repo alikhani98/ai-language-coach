@@ -31,11 +31,11 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
             <BookOpenText className="h-7 w-7" />
           </div>
           <div className="max-w-xl space-y-3">
-            <h1 className="text-3xl font-semibold leading-snug sm:text-4xl">
+            <h1 className="type-display">
               {messages.common.appName}
             </h1>
-            <p className="text-xl font-medium leading-relaxed text-primary">{messages.auth.tagline}</p>
-            <p className="max-w-md text-sm leading-7 text-muted-foreground sm:text-base">
+            <p className="type-section text-primary">{messages.auth.tagline}</p>
+            <p className="max-w-md text-sm type-copy text-muted-foreground sm:text-base">
               {messages.auth.intro}
             </p>
           </div>
@@ -47,7 +47,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
               key={feature}
               className="flex items-center gap-2 text-xs font-medium sm:text-sm"
             >
-              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
               <span>{feature}</span>
             </div>
           ))}
@@ -56,10 +56,10 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
 
       <Card className="p-6 shadow-[0_12px_40px_hsl(var(--foreground)/0.05)] sm:p-8">
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">
+          <h2 className="type-title">
             {isLogin ? messages.auth.loginTitle : messages.auth.signupTitle}
           </h2>
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-sm type-copy text-muted-foreground">
             {isLogin
               ? messages.auth.loginDescription
               : messages.auth.signupDescription}
@@ -75,7 +75,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
             {state.error}
           </p>
         ) : null}
-        <form action={formAction} className="mt-6 space-y-4">
+        <form action={formAction} className="mt-7 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email">{messages.common.email}</Label>
             <Input
@@ -83,6 +83,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
               name="email"
               type="email"
               dir="ltr"
+              className="font-latin"
               autoComplete="email"
               required
             />
@@ -94,6 +95,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
               name="password"
               type="password"
               dir="ltr"
+              className="font-latin"
               autoComplete={isLogin ? "current-password" : "new-password"}
               minLength={8}
               required

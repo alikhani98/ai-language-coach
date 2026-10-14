@@ -42,7 +42,7 @@ export function LearningRhythm({ summary, timezone, language, messages }: Learni
         </div>
       </dl>
       <div className="relative mt-6">
-        <div aria-hidden="true" className="absolute inset-x-5 top-12 h-px bg-border" />
+        <div aria-hidden="true" className="absolute inset-x-5 top-[3.125rem] h-px bg-border" />
         <ol aria-label={messages.coach.weeklyActivity} className="relative grid grid-cols-7 gap-1">
         {days.map((day, index) => {
           const active = practicedDays.has(day);
@@ -50,11 +50,11 @@ export function LearningRhythm({ summary, timezone, language, messages }: Learni
           const label = `${fullDate.format(date)}: ${active ? messages.coach.practiced : messages.coach.noPractice}`;
           return (
             <li key={day} aria-label={label} title={label} className="flex min-w-0 flex-col items-center text-center">
-              <span aria-hidden="true" className={cn("mb-3 block h-4 text-[11px] leading-4", index === days.length - 1 ? "font-semibold text-primary" : "text-muted-foreground")}>
+              <span aria-hidden="true" className={cn("mb-2 block min-h-6 text-xs", index === days.length - 1 ? "font-semibold text-primary" : "text-muted-foreground")}>
                 {index === days.length - 1 ? messages.coach.today : weekday.format(date)}
               </span>
               <span aria-hidden="true" className={cn(
-                "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xs font-medium tabular-nums",
+                "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-medium tabular-nums sm:h-10 sm:w-10",
                 active ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-background text-muted-foreground",
                 index === days.length - 1 && "ring-1 ring-primary/40 ring-offset-2 ring-offset-background",
               )}>
