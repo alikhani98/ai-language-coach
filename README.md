@@ -52,7 +52,7 @@ npm run dev
 
 ## Current Phase
 
-Deployment preparation is complete. The app uses an internal AI provider interface with OpenRouter as the default provider and optional local OpenAI-compatible endpoint support.
+Phase 8 adds a derived learner context, adaptive lesson prompts, bounded conversation memory, completion summaries, and task-specific model routing. The existing server actions, authentication, Supabase schema, and RLS remain the foundation. See `docs/phase-8.md` for architecture decisions, changed files, validation, and limitations.
 
 ## Environment Variables
 
@@ -70,6 +70,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 AI_PROVIDER=openrouter
 OPENROUTER_API_KEY=
 AI_MODEL=
+AI_LESSON_MODEL=
+AI_CONVERSATION_MODEL=
+AI_ANALYSIS_MODEL=
 AI_TIMEOUT_MS=20000
 ```
 
@@ -81,6 +84,8 @@ LOCAL_AI_BASE_URL=
 ```
 
 OpenRouter is the default production provider. The local provider is optional and is intended for OpenAI-compatible local endpoints. No paid OpenAI API key or OpenAI SDK is required.
+
+Task-specific model variables are optional and fall back to `AI_MODEL`. Progress summaries use the analysis model. No model identifiers are hardcoded. `AI_TIMEOUT_MS` accepts 1–45000 milliseconds per attempt; transient transport, timeout, rate-limit, and server failures receive one retry after 250 milliseconds. The timeout covers response-body consumption as well as connection setup. Configuration errors and malformed output are not retried.
 
 Do not expose `SUPABASE_SERVICE_ROLE_KEY` or `OPENROUTER_API_KEY` in client components, browser bundles, logs, or public documentation examples.
 

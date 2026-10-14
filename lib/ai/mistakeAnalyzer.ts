@@ -1,3 +1,5 @@
+import { buildAnalysisPrompt, mistakeAnalysisSchemaHint } from "@/lib/ai/prompts/analysis";
+import { coachRole } from "@/lib/ai/prompts/context";
 import { getAIProvider } from "@/lib/ai/provider";
 import { mistakeAnalysisSchema } from "@/lib/validations/mistake";
 
@@ -21,12 +23,6 @@ export type MistakeAnalysisInput = {
   interfaceLanguage?: string;
 };
 
-const mistakeAnalysisSchemaHint = JSON.stringify({
-  correctSentence: "string",
-  explanation: "string",
-  category: "grammar | vocabulary | pronunciation | fluency | word_order | other",
-});
-
 export async function analyzeMistake(
   input: MistakeAnalysisInput,
 ): Promise<MistakeAnalysis> {
@@ -39,24 +35,11 @@ export async function analyzeMistake(
       {
         role: "system",
         content:
-          "You are an English language coach. Analyze only the learner sentence and return valid JSON.",
+          coachRole,
       },
       {
         role: "user",
-        content: [
-          "Learner sentence:",
-          input.sentence,
-          "",
-          "Context:",
-          input.context ?? "No extra context.",
-          "",
-          `Interface language: ${input.interfaceLanguage ?? "en"}.`,
-          input.interfaceLanguage === "fa"
-            ? "The explanation may be Persian, but the corrected sentence must stay English."
-            : "The explanation should remain English.",
-          "",
-          "Correct the sentence if needed and explain the most important issue.",
-        ].join("\n"),
+        content: buildAnalysisPrompt(input),
       },
     ],
   });

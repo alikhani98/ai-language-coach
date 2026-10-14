@@ -5,15 +5,17 @@ import {
   fetchJsonWithTimeout,
   mapProviderHttpError,
   parseProviderJsonResponse,
+  withAIRetry,
 } from "@/lib/ai/providers/json";
 
 export function createLocalProvider(config: AIProviderConfig): AIProvider {
-  const generate = (request: AIJsonRequest) => requestLocalJson(config, request);
+  const generate = (request: AIJsonRequest, model?: string) =>
+    withAIRetry(() => requestLocalJson({ ...config, model: model ?? config.model }, request));
 
   return {
-    generateDailyLesson: generate,
-    generateConversationResponse: generate,
-    analyzeMistake: generate,
+    generateDailyLesson: (request) => generate(request, config.lessonModel),
+    generateConversationResponse: (request) => generate(request, config.conversationModel),
+    analyzeMistake: (request) => generate(request, config.analysisModel),
   };
 }
 

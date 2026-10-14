@@ -317,5 +317,35 @@
     "explanation": "Explanation",
     "noRepeated": "No repeated corrections yet.",
     "noSaved": "No saved corrections yet. Conversation feedback can be synced here when it appears."
+  },
+  "intelligence": {
+    "personalized": "Personalized for you",
+    "focus": "Your focus today",
+    "coachFocus": "Coach focus",
+    "reason": "Based on your recent corrections, practice {area}.",
+    "newFocus": "Build confidence with a short lesson toward your goal.",
+    "summary": "Today’s progress",
+    "vocabulary": "Vocabulary",
+    "grammar": "Grammar",
+    "speaking": "Speaking",
+    "tomorrow": "Tomorrow",
+    "wordsReviewed": "Reviewed {count} useful words.",
+    "grammarReviewed": "Practiced English examples and sentence patterns.",
+    "conversationReviewed": "Reviewed {count} coach corrections.",
+    "speakingPracticed": "Completed the independent speaking prompt. Speaking was not assessed.",
+    "exchanges": "Completed {count} conversation exchanges.",
+    "next": "Revisit {area} with a short example and a new sentence.",
+    "nextDefault": "Describe yesterday’s activities in a few English sentences.",
+    "areas": {
+      "past_simple": "past tense",
+      "grammar": "grammar",
+      "vocabulary": "word choice",
+      "word_order": "word order",
+      "tone": "tone",
+      "clarity": "clarity",
+      "other": "clear sentences",
+      "pronunciation": "English examples",
+      "fluency": "conversation flow"
+    }
   }
 }

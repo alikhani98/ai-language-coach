@@ -5,18 +5,19 @@ import {
   fetchJsonWithTimeout,
   mapProviderHttpError,
   parseProviderJsonResponse,
+  withAIRetry,
 } from "@/lib/ai/providers/json";
 
 const defaultOpenRouterBaseUrl = "https://openrouter.ai/api/v1";
 
 export function createOpenRouterProvider(config: AIProviderConfig): AIProvider {
-  const generate = (request: AIJsonRequest) =>
-    requestOpenRouterJson(config, request);
+  const generate = (request: AIJsonRequest, model?: string) =>
+    withAIRetry(() => requestOpenRouterJson({ ...config, model: model ?? config.model }, request));
 
   return {
-    generateDailyLesson: generate,
-    generateConversationResponse: generate,
-    analyzeMistake: generate,
+    generateDailyLesson: (request) => generate(request, config.lessonModel),
+    generateConversationResponse: (request) => generate(request, config.conversationModel),
+    analyzeMistake: (request) => generate(request, config.analysisModel),
   };
 }
 

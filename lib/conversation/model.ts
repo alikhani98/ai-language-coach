@@ -16,6 +16,7 @@ export type Conversation = {
   id: string;
   user_id: string;
   topic: ConversationTopic;
+  feedback?: string | null;
   status: ConversationStatus;
   active_request_id: string | null;
   active_generation_started_at: string | null;
@@ -41,7 +42,7 @@ export type ConversationThread = {
 };
 
 export const conversationColumns =
-  "id,user_id,topic,status,active_request_id,active_generation_started_at,ended_at,created_at,updated_at";
+  "id,user_id,topic,feedback,status,active_request_id,active_generation_started_at,ended_at,created_at,updated_at";
 
 export const conversationMessageColumns =
   "id,conversation_id,user_id,role,content,corrections,request_id,created_at";
@@ -51,6 +52,7 @@ export function mapConversationRow(row: Record<string, unknown>): Conversation {
     id: z.string().parse(row.id),
     user_id: z.string().parse(row.user_id),
     topic: conversationTopicSchema.parse(row.topic),
+    feedback: z.string().nullable().parse(row.feedback ?? null),
     status: conversationStatusSchema.parse(row.status ?? "active"),
     active_request_id: z.string().nullable().parse(row.active_request_id ?? null),
     active_generation_started_at: z

@@ -26,6 +26,9 @@ export interface AIProvider {
 export type AIProviderConfig = {
   provider: AIProviderName;
   model?: string;
+  lessonModel?: string;
+  conversationModel?: string;
+  analysisModel?: string;
   openRouterApiKey?: string;
   baseUrl?: string;
   localBaseUrl?: string;
@@ -36,9 +39,12 @@ const aiProviderConfigSchema = z.object({
   AI_PROVIDER: z.enum(["openrouter", "local"]).default("openrouter"),
   OPENROUTER_API_KEY: optionalString(),
   AI_MODEL: optionalString(),
+  AI_LESSON_MODEL: optionalString(),
+  AI_CONVERSATION_MODEL: optionalString(),
+  AI_ANALYSIS_MODEL: optionalString(),
   AI_BASE_URL: optionalUrl(),
   LOCAL_AI_BASE_URL: optionalUrl(),
-  AI_TIMEOUT_MS: z.coerce.number().int().positive().default(20000),
+  AI_TIMEOUT_MS: z.coerce.number().int().positive().max(45000).default(20000),
 });
 
 let providerOverride: AIProvider | null = null;
@@ -51,6 +57,9 @@ export function resolveAIProviderConfig(
     AI_PROVIDER: source.AI_PROVIDER,
     OPENROUTER_API_KEY: source.OPENROUTER_API_KEY,
     AI_MODEL: source.AI_MODEL,
+    AI_LESSON_MODEL: source.AI_LESSON_MODEL,
+    AI_CONVERSATION_MODEL: source.AI_CONVERSATION_MODEL,
+    AI_ANALYSIS_MODEL: source.AI_ANALYSIS_MODEL,
     AI_BASE_URL: source.AI_BASE_URL,
     LOCAL_AI_BASE_URL: source.LOCAL_AI_BASE_URL,
     AI_TIMEOUT_MS: source.AI_TIMEOUT_MS,
@@ -59,6 +68,9 @@ export function resolveAIProviderConfig(
   return {
     provider: parsed.AI_PROVIDER,
     model: parsed.AI_MODEL,
+    lessonModel: parsed.AI_LESSON_MODEL,
+    conversationModel: parsed.AI_CONVERSATION_MODEL,
+    analysisModel: parsed.AI_ANALYSIS_MODEL,
     openRouterApiKey: parsed.OPENROUTER_API_KEY,
     baseUrl: parsed.AI_BASE_URL,
     localBaseUrl: parsed.LOCAL_AI_BASE_URL,

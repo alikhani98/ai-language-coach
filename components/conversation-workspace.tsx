@@ -1,5 +1,7 @@
 "use client";
 
+import { AIProgressSummary } from "@/components/coach/AIProgressSummary";
+import { parseStoredSummary, fallbackProgressSummary } from "@/lib/learner/summary";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, MessageCircle, Send, Square, LoaderCircle } from "lucide-react";
@@ -27,11 +29,13 @@ type ConversationWorkspaceProps = {
   initialThread: ConversationThread | null;
   recentConversations: Conversation[];
   messages: Messages;
+  language: string;
 };
 
 export function ConversationWorkspace({
   initialThread,
   recentConversations,
+  language,
   messages: ui,
 }: ConversationWorkspaceProps) {
   const [topic, setTopic] = useState<ConversationTopic>("daily_life");
@@ -135,6 +139,7 @@ export function ConversationWorkspace({
       </aside>
 
       <Card className="min-w-0 overflow-hidden p-4 sm:p-6">
+        {isEnded && thread ? <AIProgressSummary messages={ui} summary={parseStoredSummary(thread.conversation.feedback) ?? fallbackProgressSummary({ activity: "conversation", words: [], exchanges: threadMessages.filter((item) => item.role === "assistant").length, corrections: threadMessages.flatMap((item) => item.corrections) }, language)} /> : null}
         {thread ? (
           <ConversationPanel
             thread={thread}

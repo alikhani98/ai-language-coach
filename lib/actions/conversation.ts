@@ -1,5 +1,7 @@
 "use server";
 
+import { loadLearnerContext } from "@/lib/learner/load";
+import { generateProgressSummary } from "@/lib/ai/progressCoach";
 import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/lib/actions/profile";
 import { syncCorrectionsForMessage } from "@/lib/actions/mistakes";
@@ -334,13 +336,13 @@ export async function sendConversationMessage(
     }
 
     const contextMessages = thread.messages
-      .slice(-10)
       .map((message) => ({
         role: message.role,
         content: message.content,
       }));
 
     const coachResponse = await getConversationCoachReply({
+      learnerContext: await loadLearnerContext(profile),
       profile: {
         level: profile.level,
         goal: profile.goal,
@@ -379,15 +381,12 @@ export async function sendConversationMessage(
       thread: await fetchThread(profile.user_id, thread.conversation.id),
       success: messages.actions.conversationReplied,
     };
-  } catch (error) {
+  } catch {
     await releaseGeneration(thread.conversation, parsed.data.requestId);
 
     return {
       thread: await fetchThread(profile.user_id, thread.conversation.id),
-      error:
-        error instanceof Error
-          ? error.message
-          : messages.actions.conversationReplyFailed,
+      error: messages.actions.conversationReplyFailed,
     };
   }
 }
@@ -413,8 +412,12 @@ export async function endConversation(
     return { thread, success: messages.actions.conversationAlreadyEnded };
   }
 
+  if (thread.conversation.active_request_id && !isGenerationLockStale(thread.conversation.active_generation_started_at)) {
+    return { thread, error: messages.actions.conversationPreviousAnswering };
+  }
+
   const endedAt = nowIso();
-  const { data, error } = await supabase
+  let endQuery = supabase
     .from("conversations")
     .update({
       status: "ended",
@@ -425,11 +428,34 @@ export async function endConversation(
     })
     .eq("id", thread.conversation.id)
     .eq("user_id", profile.user_id)
-    .select(conversationColumns)
-    .single();
+    .eq("status", "active");
+  endQuery = thread.conversation.active_request_id
+    ? endQuery.eq("active_request_id", thread.conversation.active_request_id)
+    : endQuery.is("active_request_id", null);
+  const { data, error } = await endQuery.select(conversationColumns).maybeSingle();
 
   if (error) {
     return { thread, error: error.message };
+  }
+
+  if (!data) {
+    return { thread: await fetchThread(profile.user_id, thread.conversation.id), error: messages.actions.conversationPreviousAnswering };
+  }
+
+  const context = await loadLearnerContext(profile);
+  const userRequests = new Set(thread.messages.filter((item) => item.role === "user").map((item) => item.request_id));
+  const answered = thread.messages.filter((item) => item.role === "assistant" && item.request_id && userRequests.has(item.request_id));
+  const summary = await generateProgressSummary(context, {
+    activity: "conversation", words: [], exchanges: answered.length,
+    corrections: answered.flatMap((item) => item.corrections), focus: context.weakAreas[0],
+  });
+  const feedback = JSON.stringify(summary);
+  try {
+    const saved = await supabase.from("conversations").update({ feedback })
+      .eq("id", thread.conversation.id).eq("user_id", profile.user_id).eq("status", "ended");
+    if (!saved.error) data.feedback = feedback;
+  } catch {
+    // Completion remains successful; the UI can derive an evidence-based summary.
   }
 
   revalidatePath("/conversation");

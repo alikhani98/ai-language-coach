@@ -1,4 +1,8 @@
 "use server";
+import { loadLearnerContext } from "@/lib/learner/load";
+import { generateProgressSummary } from "@/lib/ai/progressCoach";
+import type { ProgressSummary } from "@/lib/learner/summary";
+
 
 import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/lib/actions/profile";
@@ -14,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMessages } from "@/lib/i18n/config";
 
 type LessonActionState = {
+  summary?: ProgressSummary;
   lesson?: DailyLesson | null;
   error?: string;
   success?: string;
@@ -83,32 +88,6 @@ export async function getTodaysLesson() {
   return fetchLesson(profile.user_id, today);
 }
 
-async function getLessonHistory(userId: string) {
-  const supabase = await createClient();
-  const [mistakesResult, conversationsResult] = await Promise.all([
-    supabase
-      .from("mistakes")
-      .select("wrong_sentence")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(5),
-    supabase
-      .from("conversations")
-      .select("topic")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(5),
-  ]);
-
-  return {
-    previousMistakes:
-      mistakesResult.data?.map((item: { wrong_sentence: string }) => item.wrong_sentence) ??
-      [],
-    previousTopics:
-      conversationsResult.data?.map((item: { topic: string }) => item.topic) ?? [],
-  };
-}
-
 export async function generateTodaysLesson(
   previousState?: LessonActionState,
 ): Promise<LessonActionState> {
@@ -163,6 +142,7 @@ export async function generateTodaysLesson(
   }
 
   try {
+    const learnerContext = await loadLearnerContext(profile);
     const content = parseLessonContent(
       await generateDailyLesson({
         userProfile: {
@@ -172,7 +152,11 @@ export async function generateTodaysLesson(
           timezone: profile.timezone,
           interfaceLanguage: profile.interface_language,
         },
-        history: await getLessonHistory(profile.user_id),
+        learnerContext,
+        history: {
+          previousMistakes: learnerContext.recentMistakes.map((item) => item.wrong_sentence),
+          previousTopics: learnerContext.conversationHistory.map((item) => item.topic),
+        },
       }),
     );
 
@@ -201,7 +185,7 @@ export async function generateTodaysLesson(
       lesson: mapLessonRow(data),
       success: messages.actions.dailyReady,
     };
-  } catch (error) {
+  } catch {
     await supabase
       .from("daily_lessons")
       .update({ generation_status: "failed" })
@@ -209,11 +193,8 @@ export async function generateTodaysLesson(
       .eq("user_id", profile.user_id);
 
     return {
-      lesson: claimed,
-      error:
-        error instanceof Error
-          ? error.message
-          : messages.actions.dailyGenerationFailed,
+      lesson: { ...claimed, generation_status: "failed" },
+      error: messages.actions.dailyGenerationFailed,
     };
   }
 }
@@ -257,5 +238,8 @@ export async function finishTodaysLesson(
   return {
     lesson: mapLessonRow(data),
     success: messages.actions.dailyCompleted,
+    summary: await generateProgressSummary(await loadLearnerContext(profile), {
+      activity: "lesson", words: lesson.words.map((item) => item.word), exchanges: 0, corrections: [],
+    }),
   };
 }

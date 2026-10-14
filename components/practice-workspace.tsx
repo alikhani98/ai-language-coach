@@ -1,5 +1,7 @@
 "use client";
 
+import { AIProgressSummary } from "@/components/coach/AIProgressSummary";
+import { fallbackProgressSummary } from "@/lib/learner/summary";
 import { useActionState, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles, BookOpenText, MessageSquareText, BookText, Mic, LoaderCircle } from "lucide-react";
 import {
@@ -16,6 +18,7 @@ type PracticeWorkspaceProps = {
   initialLesson: DailyLesson | null;
   dailyMinutes: number;
   messages: Messages;
+  language: string;
 };
 
 const sectionKeys = ["vocabulary", "sentence", "reading", "speaking"] as const;
@@ -24,6 +27,7 @@ const sectionIcons = [BookOpenText, MessageSquareText, BookText, Mic];
 export function PracticeWorkspace({
   initialLesson,
   dailyMinutes,
+  language,
   messages,
 }: PracticeWorkspaceProps) {
   const [step, setStep] = useState(0);
@@ -169,6 +173,7 @@ export function PracticeWorkspace({
           ) : null}
         </div>
 
+        {lesson.completed ? <AIProgressSummary messages={messages} summary={finishState.summary ?? fallbackProgressSummary({ activity: "lesson", words: lesson.words.map((item) => item.word), exchanges: 0, corrections: [] }, language)} /> : null}
         {message ? <StatusMessage tone="success" message={message} /> : null}
         {error ? <StatusMessage tone="error" message={error} /> : null}
 

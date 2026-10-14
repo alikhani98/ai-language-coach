@@ -57,18 +57,32 @@ export async function fetchJsonWithTimeout(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    return await fetch(url, {
+    const response = await fetch(url, {
       ...init,
       signal: controller.signal,
     });
+    // Consume the body before clearing the timeout, including stalled streams.
+    const body = await response.text();
+    return new Response(body, { status: response.status, headers: response.headers });
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (controller.signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
       throw new AIProviderError("The AI provider request timed out.", "timeout");
     }
 
     throw new AIProviderError("The AI provider request failed.", "network_error");
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+export async function withAIRetry<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!(error instanceof AIProviderError) ||
+        !["network_error", "timeout", "rate_limited"].includes(error.code)) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    return operation();
   }
 }
 
@@ -86,6 +100,9 @@ export function parseProviderJsonResponse(payload: unknown): unknown {
 }
 
 export function mapProviderHttpError(status: number): AIProviderError {
+  if (status === 401 || status === 403) {
+    return new AIProviderError("The AI provider credentials were rejected.", "missing_config");
+  }
   if (status === 429) {
     return new AIProviderError("The AI provider rate limit was reached.", "rate_limited");
   }
@@ -97,7 +114,7 @@ export function mapProviderHttpError(status: number): AIProviderError {
     );
   }
 
-  return new AIProviderError("The AI provider is unavailable.", "network_error");
+  return new AIProviderError("The AI provider is unavailable.", status >= 500 || status === 408 ? "network_error" : "invalid_response");
 }
 
 function getMessageContent(payload: unknown) {

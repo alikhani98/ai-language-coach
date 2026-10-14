@@ -1,3 +1,5 @@
+import { loadLearnerContext } from "@/lib/learner/load";
+import { learnerFocus } from "@/lib/learner/focus";
 import { ArrowRight, BookOpenCheck, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { requireProfile } from "@/lib/actions/profile";
@@ -18,9 +20,11 @@ export default async function DashboardPage() {
     getProgressData(),
   ]);
   const messages = getMessages(profile.interface_language);
+  const learnerContext = await loadLearnerContext(profile);
+  const focus = learnerFocus(learnerContext, messages);
   const displayName = user.email?.split("@")[0] ?? "there";
   const level = messages.onboarding.levels[profile.level]?.[0] ?? profile.level;
-  const objective = messages.coach.objectives[profile.goal] ?? messages.practice.heading;
+  const objective = focus;
   const intro = lesson?.completed
     ? messages.coach.headerCompleted
     : lesson?.generation_status === "ready"
