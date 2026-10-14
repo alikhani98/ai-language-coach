@@ -19,16 +19,15 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
   return (
     <section className="space-y-6">
       <PageHeader
-        eyebrow={messages.mistakes.eyebrow}
-        title={messages.mistakes.heading}
-        description={messages.mistakes.body}
+        title={messages.coach.notebookTitle}
       />
 
       {notebook.categories.length ? (
         <div className="flex flex-wrap gap-2">
           <a
             href="/mistakes"
-            className="rounded-xl border bg-background px-3 py-2 text-sm"
+            aria-current={!params.category ? "page" : undefined}
+            className={`inline-flex min-h-11 items-center rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:border-primary/50 ${!params.category ? "border-primary/30 bg-primary/10 text-primary" : "bg-card text-muted-foreground"}`}
           >
             {messages.mistakes.all}
           </a>
@@ -36,7 +35,8 @@ export default async function MistakesPage({ searchParams }: MistakesPageProps) 
             <a
               key={category}
               href={`/mistakes?category=${encodeURIComponent(category)}`}
-              className="rounded-xl border bg-background px-3 py-2 text-sm"
+              aria-current={params.category === category ? "page" : undefined}
+              className={`inline-flex min-h-11 items-center rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:border-primary/50 ${params.category === category ? "border-primary/30 bg-primary/10 text-primary" : "bg-card text-muted-foreground"}`}
             >
               {category}
             </a>

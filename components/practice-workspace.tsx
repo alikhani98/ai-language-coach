@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, BookOpenText, MessageSquareText, BookText, Mic, LoaderCircle } from "lucide-react";
 import {
   finishTodaysLesson,
   generateTodaysLesson,
@@ -19,6 +19,7 @@ type PracticeWorkspaceProps = {
 };
 
 const sectionKeys = ["vocabulary", "sentence", "reading", "speaking"] as const;
+const sectionIcons = [BookOpenText, MessageSquareText, BookText, Mic];
 
 export function PracticeWorkspace({
   initialLesson,
@@ -50,8 +51,9 @@ export function PracticeWorkspace({
 
   if (!lesson) {
     return (
-      <Card className="p-5 sm:p-6">
+      <section className="section-surface py-8 sm:py-10">
         <div className="max-w-xl space-y-3">
+          <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary"><Sparkles className="h-6 w-6" /></span>
           <p className="text-sm font-medium text-muted-foreground">
             {formatMessage(messages.practice.minutePractice, {
               minutes: dailyMinutes,
@@ -66,20 +68,21 @@ export function PracticeWorkspace({
         </div>
         {error ? <StatusMessage tone="error" message={error} /> : null}
         <form action={generateAction} className="mt-6">
-          <Button type="submit" disabled={isGenerating}>
-            <Sparkles className="mr-2 h-4 w-4" />
+          <Button type="submit" className="w-full sm:w-auto" disabled={isGenerating}>
+            {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {isGenerating
               ? messages.practice.generating
               : messages.practice.generateButton}
           </Button>
         </form>
-      </Card>
+      </section>
     );
   }
 
   if (lesson.generation_status === "pending") {
     return (
-      <Card className="p-5 sm:p-6">
+      <section className="section-surface" aria-live="polite">
+        <LoaderCircle className="mb-5 h-6 w-6 animate-spin text-primary" />
         <h1 className="text-2xl font-semibold">
           {messages.practice.pendingTitle}
         </h1>
@@ -87,13 +90,13 @@ export function PracticeWorkspace({
           {messages.practice.pendingBody}
         </p>
         {error ? <StatusMessage tone="error" message={error} /> : null}
-      </Card>
+      </section>
     );
   }
 
   if (lesson.generation_status === "failed") {
     return (
-      <Card className="p-5 sm:p-6">
+      <section className="section-surface">
         <h1 className="text-2xl font-semibold">
           {messages.practice.failedTitle}
         </h1>
@@ -103,19 +106,19 @@ export function PracticeWorkspace({
         {error ? <StatusMessage tone="error" message={error} /> : null}
         <form action={generateAction} className="mt-6">
           <Button type="submit" disabled={isGenerating}>
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Sparkles className="h-4 w-4" />
             {isGenerating
               ? messages.practice.retrying
               : messages.practice.retryButton}
           </Button>
         </form>
-      </Card>
+      </section>
     );
   }
 
   return (
     <div className="space-y-5">
-      <Card className="p-4 sm:p-5">
+      <section className="section-surface p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
@@ -130,26 +133,29 @@ export function PracticeWorkspace({
           </div>
           {lesson.completed ? (
             <span className="inline-flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground">
-              <Check className="mr-2 h-4 w-4" />
+              <Check className="me-2 h-4 w-4" />
               {messages.common.completed}
             </span>
           ) : null}
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {messages.practice.sections.map((item, index) => (
+          {messages.practice.sections.map((item, index) => {
+            const Icon = sectionIcons[index];
+            return (
             <button
               key={item}
               type="button"
               className={cn(
-                "min-h-11 rounded-xl border px-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-foreground",
-                index === step && "border-primary bg-accent text-accent-foreground",
+                "flex min-h-12 items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                index === step && "bg-primary/10 text-primary ring-1 ring-primary/25",
               )}
+              aria-pressed={index === step}
               onClick={() => setStep(index)}
             >
-              {item}
+              <Icon className="h-4 w-4 shrink-0" />{item}
             </button>
-          ))}
+          );})}
         </div>
 
         <div className="mt-6 min-h-72">
@@ -173,10 +179,10 @@ export function PracticeWorkspace({
             disabled={step === 0}
             onClick={() => setStep((current) => Math.max(0, current - 1))}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
             {messages.common.back}
           </Button>
-          <div className="flex gap-3">
+          <div className="flex justify-end gap-3">
             {step < sectionKeys.length - 1 ? (
               <Button
                 type="button"
@@ -187,12 +193,12 @@ export function PracticeWorkspace({
                 }
               >
                 {messages.common.next}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             ) : (
               <form action={finishAction}>
                 <Button type="submit" disabled={isFinishing || lesson.completed}>
-                  <Check className="mr-2 h-4 w-4" />
+                  <Check className="h-4 w-4" />
                   {lesson.completed
                     ? messages.practice.finished
                     : isFinishing
@@ -203,20 +209,20 @@ export function PracticeWorkspace({
             )}
           </div>
         </div>
-      </Card>
+      </section>
     </div>
   );
 }
 
 function Vocabulary({ lesson }: { lesson: DailyLesson }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div dir="ltr" className="grid gap-4 text-left sm:grid-cols-2">
       {lesson.words.map((item) => (
-        <div key={item.word} className="rounded-xl border bg-background p-4">
-          <h2 className="text-lg font-semibold">{item.word}</h2>
+        <Card key={item.word} className="p-5">
+          <h2 className="text-xl font-semibold text-primary">{item.word}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{item.meaning}</p>
-          <p className="mt-3 text-sm">{item.example}</p>
-        </div>
+          <p className="mt-4 border-t pt-4 text-sm leading-7">{item.example}</p>
+        </Card>
       ))}
     </div>
   );
@@ -230,8 +236,8 @@ function Sentence({
   messages: Messages;
 }) {
   return (
-    <div className="rounded-xl border bg-background p-5">
-      <p className="text-2xl font-semibold leading-relaxed">{lesson.sentence}</p>
+    <div className="border-s-2 border-primary/40 py-3 ps-5 sm:ps-8">
+      <p dir="ltr" className="text-left text-2xl font-medium leading-relaxed">{lesson.sentence}</p>
       <p className="mt-4 text-sm text-muted-foreground">
         {messages.practice.sentenceHint}
       </p>
@@ -241,7 +247,7 @@ function Sentence({
 
 function Reading({ lesson }: { lesson: DailyLesson }) {
   return (
-    <article className="rounded-xl border bg-background p-5">
+    <article dir="ltr" className="max-w-2xl py-3 text-left">
       <p className="whitespace-pre-line text-base leading-8">{lesson.reading_text}</p>
     </article>
   );
@@ -255,8 +261,8 @@ function Speaking({
   messages: Messages;
 }) {
   return (
-    <div className="rounded-xl border bg-background p-5">
-      <p className="text-xl font-medium leading-8">{lesson.speaking_task}</p>
+    <div className="border-s-2 border-primary/40 py-3 ps-5 sm:ps-8">
+      <p dir="ltr" className="text-left text-xl font-medium leading-8">{lesson.speaking_task}</p>
       <p className="mt-4 text-sm text-muted-foreground">
         {messages.practice.speakingHint}
       </p>
@@ -273,6 +279,7 @@ function StatusMessage({
 }) {
   return (
     <p
+      role={tone === "error" ? "alert" : "status"}
       className={cn(
         "mt-5 rounded-md border px-3 py-2 text-sm",
         tone === "success" && "border-accent bg-accent text-accent-foreground",

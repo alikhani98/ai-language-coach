@@ -26,7 +26,7 @@ export function LanguageSelector({
         name="interface_language"
         defaultValue={currentLanguage}
         onChange={() => formRef.current?.requestSubmit()}
-        className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+        className="preference-select w-full"
       >
         <option value="en">{messages.common.english} 🇺🇸</option>
         <option value="fa">{messages.common.persian} 🇮🇷</option>

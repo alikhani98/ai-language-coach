@@ -94,7 +94,7 @@ export function OnboardingForm() {
   }, [messages, step]);
 
   return (
-    <Card className="mx-auto max-w-2xl p-5 sm:p-6">
+    <Card dir={interfaceLanguage === "fa" ? "rtl" : "ltr"} className="mx-auto max-w-2xl p-5 sm:p-8">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
           {messages.onboarding.step
@@ -118,7 +118,7 @@ export function OnboardingForm() {
       </div>
 
       {state.error ? (
-        <p className="mt-5 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p role="alert" className="mt-5 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}
         </p>
       ) : null}
@@ -169,14 +169,14 @@ export function OnboardingForm() {
             disabled={!canGoBack || isPending}
             onClick={() => setStep((current) => Math.max(0, current - 1))}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
             {messages.common.back}
           </Button>
 
           {isLastStep ? (
             <Button type="submit" disabled={isPending}>
               {isPending ? messages.common.saving : messages.onboarding.startPractice}
-              <Check className="ml-2 h-4 w-4" />
+              <Check className="h-4 w-4" />
             </Button>
           ) : (
             <Button
@@ -187,7 +187,7 @@ export function OnboardingForm() {
               }
             >
               {messages.common.continue}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Button>
           )}
         </div>
@@ -217,9 +217,10 @@ function OptionGrid<T extends string | number>({
             key={option.value}
             type="button"
             className={cn(
-              "flex min-h-16 items-center justify-between gap-3 rounded-xl border bg-background p-4 text-left transition-colors hover:border-primary",
-              selected && "border-primary bg-accent",
+              "flex min-h-16 items-center justify-between gap-3 rounded-lg border bg-background p-4 text-start transition-colors hover:border-primary/60",
+              selected && "border-primary bg-primary/5 ring-1 ring-primary/20",
             )}
+            aria-pressed={selected}
             onClick={() => onChange(option.value)}
           >
             <span>
@@ -230,7 +231,9 @@ function OptionGrid<T extends string | number>({
                 </span>
               ) : null}
             </span>
-            {selected ? <Check className="h-5 w-5 text-primary" /> : null}
+            <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full border", selected && "border-primary bg-primary text-primary-foreground")}>
+              {selected ? <Check className="h-3.5 w-3.5" /> : null}
+            </span>
           </button>
         );
       })}

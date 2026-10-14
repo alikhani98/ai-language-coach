@@ -41,7 +41,7 @@ export function ThemeSelector({
         name="theme_preference"
         value={preference}
         onChange={(event) => handleChange(event.target.value)}
-        className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+        className="preference-select w-full"
       >
         <option value="light">{messages.theme.light}</option>
         <option value="dark">{messages.theme.dark}</option>

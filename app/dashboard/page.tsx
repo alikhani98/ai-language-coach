@@ -1,20 +1,13 @@
-import {
-  ArrowRight,
-  CheckCircle2,
-  Flame,
-  MessageCircle,
-  Sparkles,
-  Timer,
-} from "lucide-react";
+import { ArrowRight, BookOpenCheck, MessageCircle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { requireProfile } from "@/lib/actions/profile";
 import { requireUser } from "@/lib/auth/user";
 import { getTodaysLesson } from "@/lib/actions/dailyLesson";
 import { getProgressData } from "@/lib/actions/progress";
 import { formatMessage, getMessages } from "@/lib/i18n/config";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
+import { AICoachMessage } from "@/components/coach/AICoachMessage";
+import { TodaysMission } from "@/components/coach/TodaysMission";
+import { LearningRhythm } from "@/components/coach/LearningRhythm";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -23,138 +16,87 @@ export default async function DashboardPage() {
     getTodaysLesson(),
     getProgressData(),
   ]);
-  const isReady = lesson?.generation_status === "ready";
   const messages = getMessages(profile.interface_language);
   const displayName = user.email?.split("@")[0] ?? "there";
+  const level = messages.onboarding.levels[profile.level]?.[0] ?? profile.level;
+  const encouragement = lesson?.completed
+    ? messages.coach.completedMessage
+    : progress.summary.currentStreak > 0
+      ? messages.coach.returnMessage
+      : messages.coach.newMessage;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow={formatMessage(messages.dashboard.eyebrow, {
-          minutes: profile.daily_minutes,
-        })}
-        title={formatMessage(messages.dashboard.greeting, {
-          name: displayName,
-        })}
-        description={messages.dashboard.body}
-      >
-        <Button asChild>
-          <Link href="/practice">
-            {isReady
-              ? messages.dashboard.openPractice
-              : messages.dashboard.generatePractice}
-            <ArrowRight className="ml-2 h-4 w-4 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
+    <div className="space-y-7 sm:space-y-9">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="mb-2 text-xs font-medium text-primary">{messages.coach.welcome}</p>
+          <h1 className="text-2xl font-semibold leading-snug sm:text-4xl">
+            {formatMessage(messages.dashboard.greeting, { name: displayName })}
+          </h1>
+        </div>
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          {messages.coach.level}
+          <span className="rounded-full border bg-card px-3 py-1.5 font-medium text-foreground">{level}</span>
+        </p>
+      </header>
+
+      <AICoachMessage
+        name={messages.coach.name}
+        label={messages.coach.role}
+        message={encouragement}
+        advice={messages.coach.advice}
+        className="max-w-3xl"
+      />
+
+      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] lg:gap-10">
+        <TodaysMission
+          lesson={lesson}
+          minutes={profile.daily_minutes}
+          level={level}
+          objective={messages.coach.objectives[profile.goal] ?? messages.practice.heading}
+          language={profile.interface_language}
+          messages={messages}
+        />
+        <div className="min-w-0 lg:pt-2">
+          <LearningRhythm
+            summary={progress.summary}
+            timezone={profile.timezone}
+            language={profile.interface_language}
+            messages={messages}
+          />
+          <Link href="/progress" className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-primary">
+            {messages.nav.progress}<ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
           </Link>
-        </Button>
-      </PageHeader>
+        </div>
+      </div>
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Card className="bg-primary text-primary-foreground">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <Timer className="h-5 w-5" />
-              <p className="text-sm font-medium opacity-90">
-                {messages.dashboard.todaysPractice}
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">
-              {profile.daily_minutes} min
-            </p>
-            <p className="mt-2 text-sm opacity-90">
-              {lesson?.completed
-                ? messages.dashboard.completed
-                : isReady
-                  ? messages.dashboard.ready
-                  : messages.dashboard.none}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <Flame className="h-5 w-5 text-primary" />
-              <p className="text-sm font-medium text-muted-foreground">
-                {messages.dashboard.currentStreak}
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">
-              {progress.summary.currentStreak}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {messages.common.days}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary" />
-              <p className="text-sm font-medium text-muted-foreground">
-                {messages.dashboard.last14Days}
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">
-              {progress.summary.practiceDaysLast14}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {messages.common.days}
-            </p>
-          </CardContent>
-        </Card>
+      <section aria-labelledby="coach-next-title" className="border-t pt-6">
+        <h2 id="coach-next-title" className="text-lg font-semibold">{messages.coach.nextStep}</h2>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 sm:gap-6">
+          {[
+            { href: "/conversation", icon: MessageCircle, title: messages.nav.conversation, body: messages.coach.conversationNudge },
+            { href: "/mistakes", icon: BookOpenCheck, title: messages.nav.mistakes, body: messages.coach.notebookNudge },
+          ].map(({ href, icon: Icon, title, body }) => (
+            <Link key={href} href={href} className="group flex items-center gap-4 rounded-lg py-4 transition-colors hover:bg-secondary sm:px-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span>
+              <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold">{title}</h3><p className="mt-1 text-xs leading-6 text-muted-foreground">{body}</p></div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-primary rtl:rotate-180" />
+            </Link>
+          ))}
+        </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold">
-              {messages.dashboard.quickActions}
-            </h2>
-          </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            <Button asChild className="h-16 justify-between px-5">
-              <Link href="/practice">
-                <span>{messages.dashboard.openPractice}</span>
-                <Sparkles className="h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 justify-between px-5">
-              <Link href="/conversation">
-                <span>{messages.nav.conversation}</span>
-                <MessageCircle className="h-5 w-5" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold">
-              {messages.dashboard.weakAreas}
-            </h2>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            {progress.weakAreas.length
-              ? progress.weakAreas.map((area) => (
-                  <div
-                    key={area.category}
-                    className="flex items-center justify-between rounded-xl border bg-background px-3 py-2"
-                  >
-                    <span>{area.category}</span>
-                    <span className="text-muted-foreground">{area.count}</span>
-                  </div>
-                ))
-              : messages.dashboard.noPatterns}
-          </CardContent>
-        </Card>
-      </section>
+      {progress.weakAreas.length ? (
+        <section className="flex flex-wrap items-center gap-3 border-t pt-5 text-xs">
+          <h2 className="font-medium text-muted-foreground">{messages.dashboard.weakAreas}</h2>
+          {progress.weakAreas.map((area) => (
+            <Link key={area.category} href={`/mistakes?category=${encodeURIComponent(area.category)}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border bg-card px-4 text-primary transition-colors hover:bg-primary/5">
+              {messages.coach.categories[area.category as keyof typeof messages.coach.categories] ?? area.category}
+              <span className="text-muted-foreground">{area.count}</span>
+            </Link>
+          ))}
+        </section>
+      ) : null}
     </div>
   );
 }

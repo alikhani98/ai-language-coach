@@ -4,43 +4,43 @@
 
 @layer base {
   :root {
-    --background: 40 38% 97%;
+    --background: 210 20% 98%;
     --foreground: 222 20% 14%;
     --card: 0 0% 100%;
     --card-foreground: 222 20% 14%;
     --primary: 173 54% 24%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 38 38% 91%;
+    --secondary: 180 16% 94%;
     --secondary-foreground: 222 20% 14%;
-    --muted: 40 24% 92%;
+    --muted: 210 16% 95%;
     --muted-foreground: 225 10% 42%;
     --accent: 199 35% 90%;
     --accent-foreground: 204 42% 20%;
     --destructive: 0 74% 42%;
     --destructive-foreground: 0 0% 100%;
-    --border: 36 23% 84%;
-    --input: 36 23% 84%;
+    --border: 210 16% 88%;
+    --input: 210 16% 82%;
     --ring: 173 54% 24%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222 24% 9%;
-    --foreground: 42 28% 92%;
-    --card: 222 20% 12%;
-    --card-foreground: 42 28% 92%;
+    --background: 210 9% 8%;
+    --foreground: 210 14% 94%;
+    --card: 210 8% 11%;
+    --card-foreground: 210 14% 94%;
     --primary: 174 48% 48%;
     --primary-foreground: 190 40% 8%;
-    --secondary: 222 16% 18%;
-    --secondary-foreground: 42 28% 92%;
-    --muted: 220 14% 18%;
+    --secondary: 210 8% 17%;
+    --secondary-foreground: 210 14% 94%;
+    --muted: 210 8% 17%;
     --muted-foreground: 218 12% 68%;
     --accent: 199 24% 22%;
     --accent-foreground: 198 42% 88%;
-    --destructive: 0 64% 48%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 24%;
-    --input: 220 13% 24%;
+    --destructive: 0 80% 72%;
+    --destructive-foreground: 0 40% 10%;
+    --border: 210 7% 23%;
+    --input: 210 7% 31%;
     --ring: 174 48% 48%;
   }
 
@@ -50,9 +50,59 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
   }
 
   html {
     @apply scroll-smooth;
   }
+
+  :is(a, button, select, summary, textarea, input):focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  [lang="fa"] body {
+    font-family: Tahoma, Arial, sans-serif;
+    line-height: 1.85;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .coach-mission {
+    background: linear-gradient(125deg, hsl(173 48% 24%), hsl(193 42% 17%));
+    box-shadow: 0 12px 32px hsl(var(--primary) / 0.12);
+    animation: coach-arrive 400ms ease-out both;
+  }
+
+  .dark .coach-mission {
+    background: linear-gradient(125deg, hsl(173 40% 19%), hsl(193 32% 13%));
+    border: 1px solid hsl(174 35% 32%);
+  }
+
+  .section-surface {
+    @apply border-y bg-card px-5 py-6 sm:px-6;
+  }
+
+  .quiet-row {
+    @apply flex items-center justify-between gap-4 border-b py-4 last:border-0;
+  }
+
+  .preference-select {
+    @apply h-11 max-w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground transition-colors hover:border-primary;
+  }
+}
+
+@keyframes coach-arrive {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }

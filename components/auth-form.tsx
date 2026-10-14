@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { BookOpenText, CheckCircle2 } from "lucide-react";
+import { BookOpenText, CheckCircle2, ArrowRight, LoaderCircle } from "lucide-react";
 import { login, signup } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,35 +24,28 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
   );
 
   return (
-    <div className="mx-auto grid min-h-[calc(100vh-9rem)] w-full max-w-5xl items-center gap-8 py-4 lg:grid-cols-[1fr_0.86fr]">
-      <section className="space-y-7">
+    <div className="mx-auto grid w-full max-w-5xl items-center gap-8 py-3 sm:py-10 lg:min-h-[calc(100svh-12rem)] lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
+      <section className="space-y-6">
         <div className="space-y-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
             <BookOpenText className="h-7 w-7" />
           </div>
           <div className="max-w-xl space-y-3">
-            <p className="text-sm font-semibold text-primary">
+            <h1 className="text-3xl font-semibold leading-snug sm:text-4xl">
               {messages.common.appName}
-            </p>
-            <h1 className="text-4xl font-semibold tracking-normal sm:text-5xl">
-              Your personal AI English coach.
             </h1>
-            <p className="text-lg leading-8 text-muted-foreground">
-              Practice 10 minutes every day with calm lessons, conversation,
-              and mistake tracking.
+            <p className="text-xl font-medium leading-relaxed text-primary">{messages.auth.tagline}</p>
+            <p className="max-w-md text-sm leading-7 text-muted-foreground sm:text-base">
+              {messages.auth.intro}
             </p>
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            "Daily English practice",
-            "AI conversation",
-            "Mistake tracking",
-          ].map((feature) => (
+        <div className="flex flex-wrap gap-x-5 gap-y-3 border-t pt-5 lg:grid">
+          {messages.auth.features.map((feature) => (
             <div
               key={feature}
-              className="flex items-center gap-2 rounded-xl border bg-card px-3 py-3 text-sm font-medium"
+              className="flex items-center gap-2 text-xs font-medium sm:text-sm"
             >
               <CheckCircle2 className="h-4 w-4 text-primary" />
               <span>{feature}</span>
@@ -61,7 +54,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
         </div>
       </section>
 
-      <Card className="p-5 shadow-lg shadow-foreground/5 sm:p-6">
+      <Card className="p-6 shadow-[0_12px_40px_hsl(var(--foreground)/0.05)] sm:p-8">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">
             {isLogin ? messages.auth.loginTitle : messages.auth.signupTitle}
@@ -78,7 +71,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
           </p>
         ) : null}
         {state.error ? (
-          <p className="mt-4 rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p role="alert" className="mt-4 rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {state.error}
           </p>
         ) : null}
@@ -89,6 +82,7 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
               id="email"
               name="email"
               type="email"
+              dir="ltr"
               autoComplete="email"
               required
             />
@@ -99,17 +93,20 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
               id="password"
               name="password"
               type="password"
+              dir="ltr"
               autoComplete={isLogin ? "current-password" : "new-password"}
               minLength={8}
               required
             />
           </div>
           <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
             {isPending
               ? messages.common.pleaseWait
               : isLogin
                 ? messages.auth.loginSubmit
                 : messages.auth.signupSubmit}
+            {!isPending ? <ArrowRight className="h-4 w-4 rtl:rotate-180" /> : null}
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-muted-foreground">

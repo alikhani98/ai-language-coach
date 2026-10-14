@@ -1,8 +1,12 @@
 import { requireProfile } from "@/lib/actions/profile";
 import { getProgressData } from "@/lib/actions/progress";
 import { getMessages } from "@/lib/i18n/config";
-import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { CheckCircle2, MessageCircle, Activity } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SectionTitle } from "@/components/ui/section-title";
+import { LearningRhythm } from "@/components/coach/LearningRhythm";
+import { AICoachMessage } from "@/components/coach/AICoachMessage";
 
 export default async function ProgressPage() {
   const profile = await requireProfile();
@@ -17,36 +21,31 @@ export default async function ProgressPage() {
         description={messages.progress.body}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric
-          label={messages.progress.last7}
-          value={`${progress.summary.practiceDaysLast7} ${messages.common.days}`}
-        />
-        <Metric
-          label={messages.progress.last14}
-          value={`${progress.summary.practiceDaysLast14} ${messages.common.days}`}
-        />
-        <Metric
-          label={messages.progress.currentStreak}
-          value={`${progress.summary.currentStreak} ${messages.common.days}`}
-        />
-        <Metric
-          label={messages.progress.completedLessons}
-          value={`${progress.summary.totalCompletedLessons}`}
-        />
+      <div className="grid gap-8 py-2 lg:grid-cols-2 lg:gap-12">
+        <LearningRhythm summary={progress.summary} timezone={profile.timezone} language={profile.interface_language} messages={messages} />
+        <div className="space-y-6 border-t pt-6 lg:border-s lg:border-t-0 lg:ps-8 lg:pt-0">
+          <AICoachMessage name={messages.coach.name} label={messages.coach.role} message={progress.summary.currentStreak > 0 ? messages.coach.returnMessage : messages.coach.newMessage} />
+          <section>
+            <h2 className="text-sm font-medium text-muted-foreground">{messages.progress.last14}</h2>
+            <p className="mt-2 text-2xl font-semibold tabular-nums">{new Intl.NumberFormat(profile.interface_language).format(progress.summary.practiceDaysLast14)} <span className="text-sm font-normal text-muted-foreground">{messages.common.days}</span></p>
+            <div role="meter" aria-label={messages.progress.last14} aria-valuemin={0} aria-valuemax={14} aria-valuenow={progress.summary.practiceDaysLast14} className="mt-3 grid grid-cols-7 gap-1.5">
+              {Array.from({ length: 14 }, (_, index) => <span key={index} className={`h-2 rounded-full ${index < progress.summary.practiceDaysLast14 ? "bg-primary" : "bg-muted"}`} />)}
+            </div>
+          </section>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-5">
-          <h2 className="font-semibold">{messages.progress.topics}</h2>
+        <section className="section-surface">
+          <SectionTitle title={messages.progress.topics} />
           <div className="mt-4 space-y-3">
             {progress.topicCounts.length ? (
               progress.topicCounts.map((topic) => (
                 <div
                   key={topic.topic}
-                  className="flex items-center justify-between rounded-xl border bg-background px-3 py-2 text-sm"
+                  className="quiet-row text-sm"
                 >
-                  <span>{topic.topic.replaceAll("_", " ")}</span>
+                  <span className="font-medium">{messages.conversation.topics[topic.topic as keyof typeof messages.conversation.topics] ?? topic.topic.replaceAll("_", " ")}</span>
                   <span className="text-muted-foreground">
                     {topic.count}{" "}
                     {topic.count === 1
@@ -56,23 +55,21 @@ export default async function ProgressPage() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">
-                {messages.progress.noTopics}
-              </p>
+              <EmptyState icon={MessageCircle} title={messages.progress.noTopics} description={messages.dashboard.conversationAction} />
             )}
           </div>
-        </Card>
+        </section>
 
-        <Card className="p-5">
-          <h2 className="font-semibold">{messages.progress.weakAreas}</h2>
+        <section className="section-surface">
+          <SectionTitle title={messages.progress.weakAreas} />
           <div className="mt-4 space-y-3">
             {progress.weakAreas.length ? (
               progress.weakAreas.map((area) => (
                 <div
                   key={area.category}
-                  className="flex items-center justify-between rounded-xl border bg-background px-3 py-2 text-sm"
+                  className="quiet-row text-sm"
                 >
-                  <span>{area.category}</span>
+                  <span>{messages.coach.categories[area.category as keyof typeof messages.coach.categories] ?? area.category}</span>
                   <span className="text-muted-foreground">
                     {area.count}{" "}
                     {area.count === 1
@@ -82,49 +79,36 @@ export default async function ProgressPage() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">
-                {messages.progress.noWeakAreas}
-              </p>
+              <EmptyState icon={CheckCircle2} title={messages.dashboard.noPatterns} description={messages.progress.noWeakAreas} />
             )}
           </div>
-        </Card>
+        </section>
       </div>
 
-      <Card className="p-5">
-        <h2 className="font-semibold">{messages.progress.recent}</h2>
+      <section className="border-t pt-6">
+        <SectionTitle title={messages.progress.recent} />
         <div className="mt-4 space-y-3">
           {progress.recentActivity.length ? (
             progress.recentActivity.map((activity) => (
               <div
                 key={activity.id}
-                className="flex flex-col gap-1 rounded-xl border bg-background px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-2 border-b py-4 text-sm last:border-0 sm:flex-row sm:items-center sm:justify-between"
               >
                 <span>
                   {activity.type === "daily_lesson"
                     ? messages.dashboard.completed
                     : messages.progress.conversation}
                 </span>
-                <span className="text-muted-foreground">
+                <span className="text-xs tabular-nums text-muted-foreground">
                   {activity.occurred_at}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">
-              {messages.progress.noActivity}
-            </p>
+            <EmptyState icon={Activity} title={messages.progress.noActivity} description={messages.dashboard.practiceAction} />
           )}
         </div>
-      </Card>
+      </section>
     </section>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <Card className="p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </Card>
   );
 }

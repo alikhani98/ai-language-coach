@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { Check, MessageCircle, Send, Square } from "lucide-react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, MessageCircle, Send, Square, LoaderCircle } from "lucide-react";
 import {
   endConversation,
   sendConversationMessage,
@@ -19,9 +19,9 @@ import {
 } from "@/lib/validations/conversation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import type { Messages } from "@/lib/i18n/config";
+import { AICoachMessage, CoachAvatar } from "@/components/coach/AICoachMessage";
 
 type ConversationWorkspaceProps = {
   initialThread: ConversationThread | null;
@@ -69,9 +69,9 @@ export function ConversationWorkspace({
   );
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[0.8fr_1.4fr]">
-      <aside className="space-y-5">
-        <Card className="p-5">
+    <div className="grid items-start gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <aside className={cn("min-w-0 space-y-6", thread && "order-2 lg:order-none")}>
+        <section className="border-b pb-6">
           <h2 className="font-semibold">{ui.conversation.start}</h2>
           <form action={startAction} className="mt-4 space-y-4">
             <input type="hidden" name="topic" value={topic} />
@@ -81,26 +81,27 @@ export function ConversationWorkspace({
                   key={item}
                   type="button"
                   className={cn(
-                    "flex min-h-12 items-center justify-between rounded-xl border bg-background px-3 py-2 text-left text-sm font-medium transition-colors hover:border-primary",
-                    topic === item && "border-primary bg-accent",
+                    "flex min-h-12 items-center justify-between gap-2 rounded-lg px-4 py-3 text-start text-sm font-medium transition-colors hover:bg-secondary",
+                    topic === item ? "bg-primary/10 text-primary ring-1 ring-primary/25" : "text-muted-foreground",
                   )}
+                  aria-pressed={topic === item}
                   onClick={() => setTopic(item)}
                 >
                   {ui.conversation.topics[item]}
-                  {topic === item ? <Check className="h-4 w-4" /> : null}
+                  <Check className={cn("h-4 w-4 shrink-0", topic !== item && "invisible")} />
                 </button>
               ))}
             </div>
             <Button type="submit" className="w-full" disabled={isStarting}>
-              <MessageCircle className="mr-2 h-4 w-4" />
+              {isStarting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
               {isStarting
                 ? ui.conversation.starting
                 : ui.conversation.startButton}
             </Button>
           </form>
-        </Card>
+        </section>
 
-        <Card className="p-5">
+        <section>
           <h2 className="font-semibold">{ui.conversation.recent}</h2>
           <div className="mt-4 space-y-2">
             {recentConversations.length ? (
@@ -109,9 +110,9 @@ export function ConversationWorkspace({
                   key={conversation.id}
                   href={`/conversation?id=${conversation.id}`}
                   className={cn(
-                    "block rounded-xl border bg-background px-3 py-2 text-sm transition-colors hover:border-primary",
+                    "block rounded-lg border-s-2 border-transparent px-4 py-3 text-sm transition-colors hover:bg-secondary",
                     thread?.conversation.id === conversation.id &&
-                      "border-primary bg-accent",
+                      "border-primary bg-secondary",
                   )}
                 >
                   <span className="font-medium">
@@ -130,10 +131,10 @@ export function ConversationWorkspace({
               </p>
             )}
           </div>
-        </Card>
+        </section>
       </aside>
 
-      <Card className="p-4 sm:p-5">
+      <Card className="min-w-0 overflow-hidden p-4 sm:p-6">
         {thread ? (
           <ConversationPanel
             thread={thread}
@@ -151,13 +152,9 @@ export function ConversationWorkspace({
             messages={ui}
           />
         ) : (
-          <div className="flex min-h-96 items-center justify-center">
-            <EmptyState
-              icon={MessageCircle}
-              title={ui.conversation.emptyTitle}
-              description={ui.conversation.emptyBody}
-              className="max-w-sm"
-            />
+          <div className="flex min-h-72 flex-col justify-center gap-6 px-1 sm:px-4">
+            <AICoachMessage name={ui.coach.name} label={ui.coach.role} message={ui.conversation.emptyTitle} advice={ui.conversation.emptyBody} />
+            <p className="border-s-2 border-primary/25 ps-4 text-sm leading-7 text-muted-foreground">{ui.coach.conversationObjective}</p>
           </div>
         )}
       </Card>
@@ -195,17 +192,31 @@ function ConversationPanel({
   messages: Messages;
 }) {
   const isEnded = thread.conversation.status === "ended";
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const panel = scrollRef.current;
+    if (!panel) return;
+
+    const messages = panel.querySelectorAll<HTMLElement>("[data-chat-message]");
+    const latest = messages.item(messages.length - 1);
+    // Keep the tutor's reply visible when its corrections exceed the viewport.
+    if (!isSending && latest && latest.offsetHeight > panel.clientHeight) {
+      panel.scrollTop += latest.getBoundingClientRect().top - panel.getBoundingClientRect().top - 20;
+    } else {
+      panel.scrollTop = panel.scrollHeight;
+    }
+  }, [threadMessages.length, isSending]);
 
   return (
-    <div className="flex min-h-[34rem] flex-col">
-      <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            {messages.conversation.coach}
-          </p>
-          <h1 className="text-2xl font-semibold">
-            {messages.conversation.topics[thread.conversation.topic]}
-          </h1>
+    <div className="flex min-h-[min(32rem,70svh)] min-w-0 flex-col">
+      <div className="flex items-start justify-between gap-3 border-b pb-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <CoachAvatar small />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">{messages.coach.name}<span className="ms-2 text-xs font-normal text-muted-foreground">{messages.conversation.coach}</span></p>
+            <h2 className="mt-1 text-sm font-medium text-primary">{messages.conversation.topics[thread.conversation.topic]}</h2>
+          </div>
         </div>
         <form action={endAction}>
           <input
@@ -216,9 +227,10 @@ function ConversationPanel({
           <Button
             type="submit"
             variant="outline"
+            size="sm"
             disabled={isEnded || isEnding}
           >
-            <Square className="mr-2 h-4 w-4" />
+            <Square className="h-3.5 w-3.5" />
             {isEnded
               ? messages.conversation.ended
               : isEnding
@@ -227,8 +239,9 @@ function ConversationPanel({
           </Button>
         </form>
       </div>
+      <p className="border-b py-3 text-xs leading-6 text-muted-foreground">{messages.coach.conversationObjective}</p>
 
-      <div className="max-h-[58vh] flex-1 space-y-4 overflow-y-auto py-5 pr-1 rtl:pl-1 rtl:pr-0">
+      <div ref={scrollRef} role="log" aria-label={messages.conversation.coach} aria-live="polite" className="h-[clamp(9rem,25svh,24rem)] flex-none space-y-5 overflow-y-auto overscroll-contain py-5 pe-1 sm:h-[52svh]">
         {threadMessages.length ? (
           threadMessages.map((message) => (
             <MessageBubble
@@ -244,7 +257,8 @@ function ConversationPanel({
         )}
         {isSending ? (
           <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-md border bg-background px-4 py-3 text-sm text-muted-foreground shadow-sm rtl:rounded-bl-2xl rtl:rounded-br-md">
+            <div role="status" className="flex items-center gap-2 rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
+              <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
               {messages.conversation.typing}
             </div>
           </div>
@@ -262,13 +276,15 @@ function ConversationPanel({
         />
         <input type="hidden" name="requestId" value={requestId} />
         <textarea
+          aria-label={messages.conversation.replyPlaceholder}
+          dir="ltr"
           name="text"
           value={text}
           onChange={(event) => setText(event.target.value)}
           disabled={isEnded || isSending}
           maxLength={800}
-          rows={3}
-          className="w-full resize-none rounded-xl border border-input bg-background px-4 py-3 text-base outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+          rows={2}
+          className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-base leading-7 outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
           placeholder={
             isEnded
               ? messages.conversation.endedPlaceholder
@@ -278,7 +294,7 @@ function ConversationPanel({
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">{text.length}/800</p>
           <Button type="submit" disabled={!canSend}>
-            <Send className="mr-2 h-4 w-4" />
+            {isSending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 rtl:-scale-x-100" />}
             {isSending ? messages.conversation.sending : messages.conversation.send}
           </Button>
         </div>
@@ -297,39 +313,47 @@ function MessageBubble({
   const isUser = message.role === "user";
 
   return (
-    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+    <div data-chat-message className={cn("flex items-start gap-2", isUser ? "justify-end" : "justify-start")}>
+      {!isUser ? <CoachAvatar small /> : null}
       <div
         className={cn(
-          "max-w-[88%] rounded-2xl border p-4 shadow-sm",
+          "min-w-0 rounded-xl p-4 sm:p-5",
           isUser
-            ? "rounded-br-md bg-primary text-primary-foreground rtl:rounded-bl-md rtl:rounded-br-2xl"
-            : "rounded-bl-md bg-background rtl:rounded-bl-2xl rtl:rounded-br-md",
+            ? "max-w-[90%] rounded-br-md bg-primary text-primary-foreground rtl:rounded-bl-md rtl:rounded-br-2xl"
+            : "max-w-[calc(100%-3rem)] rounded-bl-md bg-muted/65 rtl:rounded-bl-2xl rtl:rounded-br-md",
         )}
       >
-        <p className="whitespace-pre-line text-sm leading-6">{message.content}</p>
+        <p dir="auto" className="whitespace-pre-line text-sm leading-7">{message.content}</p>
         {!isUser && message.corrections.length ? (
           <div className="mt-4 space-y-2">
             {message.corrections.map((correction) => (
-              <div
+              <aside
                 key={`${correction.original}-${correction.corrected}`}
-                className="rounded-xl border bg-card p-3 text-sm"
+                className="border-t border-primary/20 pt-4 text-sm leading-7"
               >
+                <p className="mb-3 flex flex-wrap items-center gap-2 text-xs font-medium text-primary">
+                  <Check className="h-3.5 w-3.5" />{messages.coach.correctionTitle}
+                  <span className="text-muted-foreground">· {messages.coach.categories[correction.category]}</span>
+                </p>
                 <p>
                   <span className="text-muted-foreground">
                     {messages.conversation.original}
                   </span>{" "}
-                  {correction.original}
+                  <bdi className="text-muted-foreground line-through decoration-destructive/40">{correction.original}</bdi>
                 </p>
                 <p className="mt-1">
                   <span className="text-muted-foreground">
                     {messages.conversation.better}
                   </span>{" "}
-                  {correction.corrected}
+                  <bdi className="font-medium text-primary">{correction.corrected}</bdi>
                 </p>
-                <p className="mt-2 text-muted-foreground">
-                  {correction.explanation}
-                </p>
-              </div>
+                <details className="group mt-2">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold text-primary [&::-webkit-details-marker]:hidden">
+                    {messages.coach.why}<ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p dir="auto" className="border-s-2 border-primary/30 ps-3 text-muted-foreground">{correction.explanation}</p>
+                </details>
+              </aside>
             ))}
           </div>
         ) : null}
@@ -347,6 +371,7 @@ function StatusMessage({
 }) {
   return (
     <p
+      role={tone === "error" ? "alert" : "status"}
       className={cn(
         "rounded-md border px-3 py-2 text-sm",
         tone === "success" && "border-accent bg-accent text-accent-foreground",

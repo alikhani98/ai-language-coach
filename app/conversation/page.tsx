@@ -28,8 +28,7 @@ export default async function ConversationPage({
     <section className="space-y-6">
       <PageHeader
         eyebrow={messages.conversation.eyebrow}
-        title={messages.conversation.heading}
-        description={messages.conversation.body}
+        title={messages.nav.conversation}
       />
       <ConversationWorkspace
         initialThread={initialThread}
