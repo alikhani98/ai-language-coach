@@ -17,6 +17,7 @@ export function buildPrompt(input: DailyCoachInput) {
     `Previous topics: ${input.history.previousTopics.join("; ") || "none"}`,
     "",
     learnerPrompt(input.learnerContext),
+    "Use long-term recommendedFocus and repeatedWeaknesses when available. Treat historical patterns as review candidates, not permanent deficiencies. Vary tasks around practiced topics and recent lessons. Do not repeat a completed lesson verbatim. Learning memory contains practice evidence, not proof of mastery.",
     "Create one focused daily English lesson. Prioritize recurring weak areas, recycle vocabulary weaknesses, and build on previous lessons. Include past-tense examples when relevant and a short correction exercise inside the speaking task.",
     "Use CEFR-appropriate language and a calm coaching tone.",
     `Reading length should be ${getReadingLength(input.userProfile.dailyMinutes)}.`,

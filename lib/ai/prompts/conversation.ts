@@ -23,6 +23,7 @@ export function buildCoachPrompt(input: ConversationCoachInput) {
     `Conversation topic: ${topicLabels[input.topic]}`,
     "",
     learnerPrompt(input.learnerContext),
+    "Use the long-term recommendedFocus to gently revisit one learning pattern, while following the chosen topic. Remember practiced topics without assuming personal facts. Never claim measured improvement from lower correction counts or practice milestones.",
     `Latest lesson focus: ${input.learnerContext?.recentLessons[0]?.sentence ?? "No recent lesson"}`,
     `Conversation objective: Practice ${topicLabels[input.topic]} toward ${input.profile.goal}. Gently revisit the main weakness.`,
     `Earlier learner excerpts: ${memory.earlierSummary || "none"}`,

@@ -7,10 +7,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SectionTitle } from "@/components/ui/section-title";
 import { LearningRhythm } from "@/components/coach/LearningRhythm";
 import { AICoachMessage } from "@/components/coach/AICoachMessage";
+import { WeeklyCoachReport } from "@/components/coach/WeeklyCoachReport";
+import { loadLearningMemory } from "@/lib/memory/load";
 
 export default async function ProgressPage() {
   const profile = await requireProfile();
-  const progress = await getProgressData();
+  const [progress, memory] = await Promise.all([getProgressData(), loadLearningMemory(profile)]);
   const messages = getMessages(profile.interface_language);
 
   return (
@@ -20,6 +22,8 @@ export default async function ProgressPage() {
         title={messages.progress.heading}
         description={messages.progress.body}
       />
+
+      <WeeklyCoachReport memory={memory.status === "ready" ? memory.memory : undefined} language={profile.interface_language} />
 
       <div className="grid gap-8 py-2 lg:grid-cols-2 lg:gap-12">
         <LearningRhythm summary={progress.summary} timezone={profile.timezone} language={profile.interface_language} messages={messages} />

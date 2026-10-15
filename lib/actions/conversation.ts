@@ -1,6 +1,7 @@
 "use server";
 
 import { loadLearnerContext } from "@/lib/learner/load";
+import { refreshLearningMemory } from "@/lib/memory/load";
 import { generateProgressSummary } from "@/lib/ai/progressCoach";
 import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/lib/actions/profile";
@@ -372,6 +373,7 @@ export async function sendConversationMessage(
     }
 
     await releaseGeneration(thread.conversation, parsed.data.requestId);
+    await refreshLearningMemory(profile);
     revalidatePath("/conversation");
     revalidatePath("/mistakes");
     revalidatePath("/progress");
@@ -409,6 +411,7 @@ export async function endConversation(
   const supabase = await createClient();
 
   if (thread.conversation.status === "ended") {
+    await refreshLearningMemory(profile);
     return { thread, success: messages.actions.conversationAlreadyEnded };
   }
 
@@ -442,6 +445,7 @@ export async function endConversation(
     return { thread: await fetchThread(profile.user_id, thread.conversation.id), error: messages.actions.conversationPreviousAnswering };
   }
 
+  await refreshLearningMemory(profile);
   const context = await loadLearnerContext(profile);
   const userRequests = new Set(thread.messages.filter((item) => item.role === "user").map((item) => item.request_id));
   const answered = thread.messages.filter((item) => item.role === "assistant" && item.request_id && userRequests.has(item.request_id));
@@ -459,6 +463,8 @@ export async function endConversation(
   }
 
   revalidatePath("/conversation");
+  revalidatePath("/dashboard");
+  revalidatePath("/progress");
 
   return {
     thread: {

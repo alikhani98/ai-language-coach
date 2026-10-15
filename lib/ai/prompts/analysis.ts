@@ -1,4 +1,5 @@
 import type { MistakeAnalysisInput } from "@/lib/ai/mistakeAnalyzer";
+import { learnerPrompt } from "@/lib/ai/prompts/context";
 export const mistakeAnalysisSchemaHint = JSON.stringify({
   correctSentence: "string",
   explanation: "string",
@@ -12,6 +13,8 @@ export function buildAnalysisPrompt(input: MistakeAnalysisInput) { return [
           "",
           "Context:",
           input.context ?? "No extra context.",
+          learnerPrompt(input.learnerContext),
+          "Use repeated learning patterns only as context. Do not invent an error to match memory. Only confirmed, saved corrections may update long-term evidence; do not output personal facts as memory.",
           "",
           `Interface language: ${input.interfaceLanguage ?? "en"}.`,
           input.interfaceLanguage === "fa"

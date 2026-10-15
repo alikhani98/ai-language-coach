@@ -23,7 +23,7 @@ export async function login(
 
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Check your login details.",
+      error: "authFailed",
     };
   }
 
@@ -31,7 +31,7 @@ export async function login(
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    return { error: error.message };
+    return { error: "authFailed" };
   }
 
   redirect("/dashboard");
@@ -45,7 +45,7 @@ export async function signup(
 
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? "Check your signup details.",
+      error: "signupFailed",
     };
   }
 
@@ -53,14 +53,14 @@ export async function signup(
   const { data, error } = await supabase.auth.signUp(parsed.data);
 
   if (error) {
-    return { error: error.message };
+    return { error: "signupFailed" };
   }
 
   if (data.session) {
-    redirect("/dashboard");
+    redirect("/approval-pending");
   }
 
-  redirect("/login?message=check-email");
+  return { error: "registrationUnavailable" };
 }
 
 export async function logout() {

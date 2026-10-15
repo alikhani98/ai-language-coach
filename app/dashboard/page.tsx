@@ -11,6 +11,8 @@ import { CoachAvatar } from "@/components/coach/AICoachMessage";
 import { CoachInsight } from "@/components/coach/CoachInsight";
 import { TodaysMission } from "@/components/coach/TodaysMission";
 import { LearningRhythm } from "@/components/coach/LearningRhythm";
+import { LearningMemoryInsight } from "@/components/coach/LearningMemoryInsight";
+import { WeeklyCoachReport } from "@/components/coach/WeeklyCoachReport";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -72,12 +74,14 @@ export default async function DashboardPage() {
       </div>
 
       <div className="coach-home-insight">
-        <CoachInsight
+        {learnerContext.learningMemory ? (
+          <LearningMemoryInsight memory={learnerContext.learningMemory} language={profile.interface_language} />
+        ) : <CoachInsight
           category={progress.weakAreas[0]?.category}
           hasPractice={progress.summary.practiceDays.length > 0}
           completed={Boolean(lesson?.completed)}
           messages={messages}
-        />
+        />}
       </div>
 
       <div className="coach-home-rhythm border-t pt-5">
@@ -108,6 +112,9 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </section>
+      <div className="coach-home-weekly min-w-0">
+        <WeeklyCoachReport memory={learnerContext.learningMemory} language={profile.interface_language} />
+      </div>
     </div>
   );
 }

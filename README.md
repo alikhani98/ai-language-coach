@@ -52,6 +52,8 @@ npm run dev
 
 ## Current Phase
 
+Phase 9 adds a bilingual admin console and manual account approval. New accounts are pending; existing accounts retain access. Apply the new migration before deploying, disable hosted Supabase email confirmation for this workflow, and bootstrap a trusted admin. No approval email or service-role key is required. See [Phase 9 architecture, security and deployment steps](docs/PHASE_9_ADMIN.md). Production migration and browser acceptance remain deployment steps.
+
 Phase 8 adds a derived learner context, adaptive lesson prompts, bounded conversation memory, completion summaries, and task-specific model routing. The existing server actions, authentication, Supabase schema, and RLS remain the foundation. See `docs/phase-8.md` for architecture decisions, changed files, validation, and limitations.
 
 ## Environment Variables

@@ -1,5 +1,6 @@
 "use server";
 
+import { accountDestination, type AccountStatus } from "@/lib/admin/model";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -29,6 +30,7 @@ export type UserProfile = {
   interface_language: InterfaceLanguage;
   theme_preference: ThemePreference;
   created_at: string;
+  status?: AccountStatus;
 };
 
 function parseProfileForm(formData: FormData) {
@@ -47,12 +49,12 @@ export async function getProfile(): Promise<UserProfile | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("users_profile")
-    .select("id,user_id,level,goal,daily_minutes,timezone,interface_language,theme_preference,created_at")
+    .select("id,user_id,level,goal,daily_minutes,timezone,interface_language,theme_preference,created_at,status")
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error("Unable to load account preferences.");
   }
 
   return data as UserProfile | null;
@@ -60,6 +62,9 @@ export async function getProfile(): Promise<UserProfile | null> {
 
 export async function requireProfile(): Promise<UserProfile> {
   const profile = await getProfile();
+
+  const destination = accountDestination(profile?.status);
+  if (destination) redirect(destination);
 
   if (!isProfileComplete(profile)) {
     redirect("/onboarding");
@@ -82,18 +87,17 @@ export async function createProfile(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("users_profile").insert({
-    user_id: user.id,
+  const { error } = await supabase.from("users_profile").update({
     level: parsed.data.level,
     goal: parsed.data.goal,
     daily_minutes: parsed.data.daily_minutes,
     timezone: parsed.data.timezone,
     interface_language: parsed.data.interface_language,
     theme_preference: parsed.data.theme_preference,
-  });
+  }).eq("user_id", user.id);
 
   if (error) {
-    return { error: error.message };
+    return { error: getMessages(parsed.data.interface_language).actions.profileInvalid };
   }
 
   redirect("/dashboard");
@@ -126,7 +130,7 @@ export async function updateProfile(
     .eq("user_id", user.id);
 
   if (error) {
-    return { error: error.message };
+    return { error: getMessages(parsed.data.interface_language).actions.profileInvalid };
   }
 
   redirect("/dashboard");

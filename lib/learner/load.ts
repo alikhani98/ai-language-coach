@@ -1,9 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import type { UserProfile } from "@/lib/actions/profile";
 import { buildLearnerContext } from "@/lib/learner/context";
+import { loadLearningMemory } from "@/lib/memory/load";
 
 // Only call with the profile returned by requireProfile; use the session client and RLS.
 export async function loadLearnerContext(profile: UserProfile) {
+  const memory = await loadLearningMemory(profile);
+  const withMemory = (context: ReturnType<typeof buildLearnerContext>) => ({
+    ...context,
+    learningMemory: memory.status === "ready" ? memory.memory : undefined,
+  });
   try {
     const supabase = await createClient();
     const [mistakes, lessons, conversations] = await Promise.all([
@@ -15,15 +21,15 @@ export async function loadLearnerContext(profile: UserProfile) {
         .eq("user_id", profile.user_id).order("updated_at", { ascending: false }).limit(4),
     ]);
     // Optional history must not prevent practice when a query fails.
-    return buildLearnerContext(profile, {
+    return withMemory(buildLearnerContext(profile, {
       mistakes: mistakes.error ? [] : mistakes.data ?? [],
       lessons: lessons.error ? [] : (lessons.data ?? []).map((lesson) => ({
         date: lesson.date, sentence: lesson.sentence, completed: lesson.completed,
         summary: `Reading: ${lesson.reading_text.slice(0, 240)} Speaking prompt: ${lesson.speaking_task.slice(0, 180)}`,
       })),
       conversations: conversations.error ? [] : conversations.data ?? [],
-    });
+    }));
   } catch {
-    return buildLearnerContext(profile);
+    return withMemory(buildLearnerContext(profile));
   }
 }

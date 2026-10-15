@@ -1,5 +1,15 @@
 # Recommended Continuation Plan
 
+## Phase 9 deployment acceptance — first
+
+- Apply earlier migrations and the new admin-approval migration in staging, then follow the coordinated production rollout in `docs/PHASE_9_ADMIN.md`.
+- Verify hosted email confirmation is disabled, bootstrap one trusted existing active admin, and smoke-test real signup/approval/onboarding.
+- Verify normal-user denial, suspension, rejection, reactivation, audit records, and preserved Phase 8.1 memory.
+- Run authenticated browser checks at 360/390/768/1024/1440px with English/Persian and light/dark/system/auto themes.
+- Design secure initial-password/reset handling before optional admin account creation; define retention/recovery before destructive deletion.
+
+Earlier backlog below is historical; the admin console is now implemented.
+
 ## Priority 1
 
 ### Task 1: Recreate A Reliable Development Environment

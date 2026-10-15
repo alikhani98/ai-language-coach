@@ -12,10 +12,25 @@ type EmptyObject = { [K in never]: never };
 export type Database = {
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: { id: string; admin_user_id: string | null; target_user_id: string | null; action: string; metadata: Json; created_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      learning_memory: {
+        Row: { user_id: string; schema_version: number; as_of: string; snapshot: Json; updated_at: string };
+        Insert: { user_id: string; schema_version?: number; as_of: string; snapshot: Json; updated_at?: string };
+        Update: { user_id?: string; schema_version?: number; as_of?: string; snapshot?: Json; updated_at?: string };
+        Relationships: [];
+      };
       users_profile: {
         Row: {
           id: string;
           user_id: string;
+          status: "pending" | "active" | "suspended" | "rejected";
+          approved_at: string | null;
+          approved_by: string | null;
           level: string;
           goal: string;
           daily_minutes: number;
@@ -38,6 +53,9 @@ export type Database = {
         Update: {
           id?: string;
           user_id?: string;
+          status?: "pending" | "active" | "suspended" | "rejected";
+          approved_at?: string | null;
+          approved_by?: string | null;
           level?: string;
           goal?: string;
           daily_minutes?: number;
@@ -228,6 +246,18 @@ export type Database = {
     };
     Views: EmptyObject;
     Functions: {
+      is_app_admin: { Args: EmptyObject; Returns: boolean };
+      has_active_account: { Args: EmptyObject; Returns: boolean };
+      admin_change_user: { Args: { p_target: string; p_action: string; p_profile?: Json | null }; Returns: undefined };
+      admin_users: { Args: { p_search?: string; p_status?: string; p_page?: number }; Returns: Json };
+      admin_user_detail: { Args: { p_target: string }; Returns: Json };
+      admin_audit: { Args: { p_page?: number }; Returns: Json };
+      refresh_learning_memory: { Args: EmptyObject; Returns: Json };
+      valid_learning_memory: { Args: { value: Json }; Returns: boolean };
+      learning_memory_area: {
+        Args: { category: string; original: string; corrected: string; explanation: string };
+        Returns: string;
+      };
       insert_assistant_conversation_message: {
         Args: {
           p_conversation_id: string;

@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/env";
+import { accountDestination } from "@/lib/admin/model";
 import { isProfileComplete } from "@/lib/daily/lesson";
 
 type CookieToSet = {
@@ -28,21 +29,21 @@ function isAuthRoute(pathname: string) {
   return pathname === "/login" || pathname === "/signup";
 }
 
-async function getHasProfile(
+async function getAccount(
   supabase: ReturnType<typeof createServerClient>,
   userId: string,
 ) {
   const { data, error } = await supabase
     .from("users_profile")
-    .select("level,goal,daily_minutes,timezone")
+    .select("level,goal,daily_minutes,timezone,status")
     .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
-    return false;
+    return null;
   }
 
-  return isProfileComplete(data);
+  return data;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -79,37 +80,44 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (!user && (isProtectedRoute(pathname) || pathname === onboardingRoute)) {
+  const adminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  const statusRoute = [
+    "/approval-pending",
+    "/account-suspended",
+    "/account-rejected",
+  ].includes(pathname);
+  const protectedRoute =
+    isProtectedRoute(pathname) ||
+    pathname === onboardingRoute ||
+    adminRoute ||
+    statusRoute;
+  function go(destination: string) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirectedFrom", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (user && isAuthRoute(pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = destination;
     url.search = "";
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    supabaseResponse.cookies
+      .getAll()
+      .forEach((cookie) => response.cookies.set(cookie));
+    return response;
   }
-
-  if (user) {
-    const hasProfile = await getHasProfile(supabase, user.id);
-
-    if (!hasProfile && isProtectedRoute(pathname)) {
-      const url = request.nextUrl.clone();
-      url.pathname = onboardingRoute;
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-
-    if (hasProfile && pathname === onboardingRoute) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
+  if (!user && protectedRoute) return go("/login");
+  if (user && (protectedRoute || isAuthRoute(pathname))) {
+    const profile = await getAccount(supabase, user.id);
+    const destination = accountDestination(profile?.status);
+    if (destination)
+      return pathname === destination ? supabaseResponse : go(destination);
+    if (adminRoute && user.app_metadata?.role !== "admin")
+      return go("/dashboard");
+    if (isAuthRoute(pathname) || statusRoute) return go("/dashboard");
+    if (
+      !adminRoute &&
+      !isProfileComplete(profile) &&
+      isProtectedRoute(pathname)
+    )
+      return go(onboardingRoute);
+    if (isProfileComplete(profile) && pathname === onboardingRoute)
+      return go("/dashboard");
   }
-
   return supabaseResponse;
 }

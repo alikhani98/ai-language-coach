@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserProfile } from "@/lib/actions/profile";
 
+// Keep this file's session client mock independent in the non-isolated worker.
+vi.hoisted(() => vi.resetModules());
+
 const { from, createClient } = vi.hoisted(() => ({ from: vi.fn(), createClient: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient }));
 import { loadLearnerContext } from "@/lib/learner/load";

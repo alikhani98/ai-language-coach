@@ -1,3 +1,5 @@
+import type { LearnerMemory } from "@/lib/memory/learnerMemory";
+
 export type LearnerMistake = {
   wrong_sentence: string;
   correct_sentence: string;
@@ -6,6 +8,7 @@ export type LearnerMistake = {
 };
 
 export type LearnerContext = {
+  learningMemory?: LearnerMemory;
   level: string;
   goal: string;
   dailyMinutes: number;

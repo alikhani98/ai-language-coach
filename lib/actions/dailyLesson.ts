@@ -2,6 +2,7 @@
 import { loadLearnerContext } from "@/lib/learner/load";
 import { generateProgressSummary } from "@/lib/ai/progressCoach";
 import type { ProgressSummary } from "@/lib/learner/summary";
+import { refreshLearningMemory } from "@/lib/memory/load";
 
 
 import { revalidatePath } from "next/cache";
@@ -216,6 +217,7 @@ export async function finishTodaysLesson(
   }
 
   if (lesson.completed) {
+    await refreshLearningMemory(profile);
     return { lesson, success: messages.actions.dailyAlreadyCompleted };
   }
 
@@ -232,8 +234,10 @@ export async function finishTodaysLesson(
     return { lesson, error: error.message };
   }
 
+  await refreshLearningMemory(profile);
   revalidatePath("/dashboard");
   revalidatePath("/practice");
+  revalidatePath("/progress");
 
   return {
     lesson: mapLessonRow(data),

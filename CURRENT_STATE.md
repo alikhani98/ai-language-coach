@@ -1,5 +1,11 @@
 # Current Implementation State
 
+## Phase 9 update — 2026-10-16
+
+The admin console, manual approval lifecycle, transactional audit log, active-account learning gate, and bilingual status pages are implemented. The new migration preserves existing users and defaults future signups to pending. Hosted Auth email-confirmation configuration and production migration have not been changed. Optional admin creation/deletion are deferred. See [PHASE_9_ADMIN.md](docs/PHASE_9_ADMIN.md) for authorization, tests, exact deployment steps and remaining acceptance checks. Phase 8.1 work already present in this checkout was preserved.
+
+The following earlier inventory is historical: its statements that no Git repository/admin console exists are superseded by this update and the current working tree.
+
 ## Working Features
 
 ### Authentication And Session Handling

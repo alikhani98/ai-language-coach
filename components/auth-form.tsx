@@ -72,9 +72,10 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
         ) : null}
         {state.error ? (
           <p role="alert" className="mt-4 rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {state.error}
+            {messages.admin[state.error as "authFailed" | "signupFailed" | "registrationUnavailable"] ?? messages.admin.authFailed}
           </p>
         ) : null}
+        {!isLogin ? <p className="mt-4 text-sm text-muted-foreground">{messages.admin.signupNote}</p> : null}
         <form action={formAction} className="mt-7 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email">{messages.common.email}</Label>

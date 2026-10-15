@@ -1,3 +1,4 @@
+import { isProfileComplete } from "@/lib/daily/lesson";
 import Link from "next/link";
 import { BookOpenText, LogOut, Settings2 } from "lucide-react";
 import { logout } from "@/lib/actions/auth";
@@ -12,7 +13,8 @@ import { getMessages, resolveInterfaceLanguage } from "@/lib/i18n/config";
 export async function AppNav() {
   const user = await getCurrentUser();
   const profile = user ? await getProfile() : null;
-  const isOnboardingComplete = Boolean(profile);
+  const isOnboardingComplete =
+    profile?.status === "active" && isProfileComplete(profile);
   const language = resolveInterfaceLanguage(profile);
   const messages = getMessages(language);
   const navItems = [
@@ -46,6 +48,15 @@ export async function AppNav() {
               </span>
             </Link>
 
+            {user?.app_metadata?.role === "admin" &&
+            profile?.status === "active" ? (
+              <Link
+                className="inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium"
+                href="/admin"
+              >
+                {messages.admin.title}
+              </Link>
+            ) : null}
             {user && profile ? (
               <details className="group relative shrink-0">
                 <summary
@@ -60,7 +71,10 @@ export async function AppNav() {
                     <p className="text-xs font-medium text-muted-foreground">
                       {messages.common.language}
                     </p>
-                    <LanguageSelector currentLanguage={language} messages={messages} />
+                    <LanguageSelector
+                      currentLanguage={language}
+                      messages={messages}
+                    />
                   </div>
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground">
@@ -68,15 +82,22 @@ export async function AppNav() {
                     </p>
                     <ThemeSelector messages={messages} persistToProfile />
                   </div>
-                  <Link
-                    href="/mistakes"
-                    className="flex min-h-11 items-center gap-2 border-t pt-3 text-sm font-medium text-primary md:hidden"
-                  >
-                    <BookOpenText className="h-4 w-4" />
-                    {messages.nav.mistakes}
-                  </Link>
+                  {isOnboardingComplete ? (
+                    <Link
+                      href="/mistakes"
+                      className="flex min-h-11 items-center gap-2 border-t pt-3 text-sm font-medium text-primary md:hidden"
+                    >
+                      <BookOpenText className="h-4 w-4" />
+                      {messages.nav.mistakes}
+                    </Link>
+                  ) : null}
                   <form action={logout}>
-                    <Button type="submit" variant="ghost" size="sm" className="w-full justify-start">
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start"
+                    >
                       <LogOut className="h-4 w-4" />
                       {messages.nav.logout}
                     </Button>
@@ -110,16 +131,14 @@ export async function AppNav() {
               <NavigationLinks items={desktopNavItems} />
             </div>
           ) : null}
-          {user && !isOnboardingComplete ? (
+          {user && profile?.status === "active" && !isOnboardingComplete ? (
             <Link href="/onboarding" className="font-medium text-primary">
               {messages.nav.completeOnboarding}
             </Link>
           ) : null}
         </nav>
       </header>
-      {user && isOnboardingComplete ? (
-        <MobileNav items={navItems} />
-      ) : null}
+      {user && isOnboardingComplete ? <MobileNav items={navItems} /> : null}
     </>
   );
 }

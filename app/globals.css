@@ -180,7 +180,7 @@
 
   .coach-home-grid {
     display: grid;
-    grid-template-areas: "greeting" "mission" "insight" "rhythm" "actions";
+    grid-template-areas: "greeting" "mission" "insight" "rhythm" "actions" "weekly";
     gap: 1.75rem;
     align-items: start;
   }
@@ -190,6 +190,7 @@
   .coach-home-insight { grid-area: insight; min-width: 0; }
   .coach-home-rhythm { grid-area: rhythm; min-width: 0; }
   .coach-home-actions { grid-area: actions; min-width: 0; }
+  .coach-home-weekly { grid-area: weekly; min-width: 0; }
 
   .coach-insight-bubble {
     box-shadow: 0 4px 20px hsl(var(--foreground) / 0.035);
@@ -203,7 +204,7 @@
   @media (min-width: 1024px) {
     .coach-home-grid {
       grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-      grid-template-areas: "greeting mission" "rhythm mission" "insight actions";
+      grid-template-areas: "greeting mission" "rhythm mission" "insight actions" "weekly weekly";
       column-gap: 3rem;
       row-gap: 2rem;
     }

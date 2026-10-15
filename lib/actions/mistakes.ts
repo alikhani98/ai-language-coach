@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/lib/actions/profile";
+import { refreshLearningMemory } from "@/lib/memory/load";
 import {
   groupMistakes,
   mapMistakeRow,
@@ -80,6 +81,7 @@ export async function syncConversationCorrections() {
   });
 
   if (!mistakeRows.length) {
+    await refreshLearningMemory(profile);
     return { inserted: 0 };
   }
 
@@ -93,6 +95,8 @@ export async function syncConversationCorrections() {
   if (upsertError) {
     throw new Error(upsertError.message);
   }
+
+  await refreshLearningMemory(profile);
 
   revalidatePath("/mistakes");
   revalidatePath("/progress");
@@ -243,5 +247,6 @@ export async function removeMistake(
   revalidatePath("/progress");
   revalidatePath("/dashboard");
 
+  await refreshLearningMemory(profile);
   return { success: messages.actions.mistakeRemoved };
 }

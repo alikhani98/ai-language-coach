@@ -78,7 +78,11 @@
     "checkEmail": "Check your email to confirm your account, then log in.",
     "tagline": "A little practice. More confidence.",
     "intro": "Make room for your English. Short daily lessons, real conversation, and feedback that stays with you.",
-    "features": ["Daily English practice", "AI conversation", "Mistake tracking"]
+    "features": [
+      "Daily English practice",
+      "AI conversation",
+      "Mistake tracking"
+    ]
   },
   "onboarding": {
     "eyebrow": "Personalize your practice",
@@ -97,11 +101,26 @@
       "language": "Language"
     },
     "levels": {
-      "a1_beginner": ["A1 Beginner", "Simple words and phrases."],
-      "a2_elementary": ["A2 Elementary", "Everyday basics."],
-      "b1_intermediate": ["B1 Intermediate", "Common conversations."],
-      "b2_upper_intermediate": ["B2 Upper Intermediate", "Clear, confident expression."],
-      "c1_advanced": ["C1 Advanced", "Nuanced, flexible English."]
+      "a1_beginner": [
+        "A1 Beginner",
+        "Simple words and phrases."
+      ],
+      "a2_elementary": [
+        "A2 Elementary",
+        "Everyday basics."
+      ],
+      "b1_intermediate": [
+        "B1 Intermediate",
+        "Common conversations."
+      ],
+      "b2_upper_intermediate": [
+        "B2 Upper Intermediate",
+        "Clear, confident expression."
+      ],
+      "c1_advanced": [
+        "C1 Advanced",
+        "Nuanced, flexible English."
+      ]
     },
     "goals": {
       "conversation": "Conversation",
@@ -224,7 +243,12 @@
     "ready": "Today's lesson is ready.",
     "none": "No lesson has been generated for today yet.",
     "noPatterns": "No correction patterns yet.",
-    "activities": ["Vocabulary", "Sentence", "Reading", "Speaking"]
+    "activities": [
+      "Vocabulary",
+      "Sentence",
+      "Reading",
+      "Speaking"
+    ]
   },
   "practice": {
     "eyebrow": "Daily Language Coach",
@@ -242,7 +266,12 @@
     "retryButton": "Retry Generation",
     "retrying": "Retrying",
     "progressLabel": "{current} of {total}",
-    "sections": ["Vocabulary", "Sentence", "Reading", "Speaking"],
+    "sections": [
+      "Vocabulary",
+      "Sentence",
+      "Reading",
+      "Speaking"
+    ],
     "sentenceHint": "Read it slowly, then say it aloud three times with natural rhythm.",
     "speakingHint": "Speak aloud independently. This practice does not record audio or score pronunciation.",
     "finished": "Finished",
@@ -347,5 +376,112 @@
       "pronunciation": "English examples",
       "fluency": "conversation flow"
     }
+  },
+  "memory": {
+    "noticed": "Your coach noticed",
+    "growing": "What you are building",
+    "challenge": "A pattern to revisit",
+    "recommendation": "Your next step",
+    "beginning": "Your learning story starts with the next short session. As you practice, your coach will notice useful patterns.",
+    "rhythm": "You made room for English on {count} days in the last seven days.",
+    "topicPractice": "You returned to {topic} across {count} conversations.",
+    "milestone": "You have completed {count} {kind}.",
+    "lessons": "lessons",
+    "conversations": "conversations",
+    "repeated": "{area} appeared in {count} corrections across {sessions} sessions.",
+    "historical": "A pattern from earlier practice; a short review can show what still needs attention.",
+    "noPattern": "There is not enough repeated feedback to identify a lasting challenge yet.",
+    "next": "Try three new English sentences focusing on {area}, then use one in a conversation.",
+    "nextDefault": "Complete a short lesson, then use one of its words in a conversation.",
+    "weeklyTitle": "Your weekly coach report",
+    "weeklySubtitle": "The last seven days, including today, in your timezone.",
+    "sessions": "Sessions completed",
+    "vocabulary": "Vocabulary reviews",
+    "exchanges": "Conversation exchanges",
+    "sessionDefinition": "Sessions are completed lessons and ended conversations with at least one answered message. Vocabulary counts are review opportunities, including repeated words.",
+    "improvement": "Learning signals",
+    "grammar": "Grammar practice",
+    "grammarPractice": "{count} completed lessons included sentence practice. This records practice, not assessed grammar accuracy.",
+    "lowerFeedback": "Fewer {area} corrections per exchange than in the previous seven days. Topics and task difficulty may differ.",
+    "noComparison": "More comparable conversation practice is needed before showing a feedback trend.",
+    "emptyWeek": "No completed sessions in the last seven days yet. Your earlier learning history is still remembered.",
+    "unavailable": "Your learning history is temporarily unavailable. You can keep practicing; your coach will reconnect to it later.",
+    "privacy": "Learning patterns only; personal conversation details are not saved in coach memory.",
+    "grammarFeedback": "You received {count} grammar corrections in conversations over the last seven days."
+  },
+  "admin": {
+    "title": "Admin console",
+    "description": "Manage access and support each learner.",
+    "overview": "Overview",
+    "users": "Users",
+    "audit": "Audit activity",
+    "total": "Total users",
+    "pending": "Pending",
+    "active": "Active",
+    "suspended": "Suspended",
+    "rejected": "Rejected",
+    "all": "All statuses",
+    "search": "Search email",
+    "filter": "Apply filters",
+    "created": "Created",
+    "level": "Learning level",
+    "status": "Account status",
+    "view": "View user",
+    "empty": "No users match these filters.",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "approve": "Approve",
+    "reject": "Reject",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "user_approved": "User approved",
+    "user_rejected": "User rejected",
+    "user_suspended": "User suspended",
+    "user_reactivated": "User reactivated",
+    "user_updated": "Profile updated",
+    "confirm": "Confirm account change",
+    "confirmBody": "This changes the learner’s access immediately. Review the account and action before confirming.",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "edit": "Learning preferences",
+    "goal": "Learning goal",
+    "daily_minutes": "Daily minutes",
+    "timezone": "Timezone",
+    "interface_language": "Interface language",
+    "theme_preference": "Theme",
+    "email": "Email",
+    "lastSignIn": "Last sign-in",
+    "unknown": "Not available",
+    "saved": "Changes saved.",
+    "invalid": "Check the selected values and try again.",
+    "conflict": "This account has changed. Refresh and review its current status.",
+    "failed": "Unable to complete this request. Please try again.",
+    "loadFailed": "Unable to load this information. Please try again.",
+    "refresh": "Refresh status",
+    "pendingTitle": "Your account has been created.",
+    "pendingBody": "Your account is waiting for administrator approval. You can start learning once your account is approved. No email confirmation is required.",
+    "suspendedTitle": "Your account is suspended.",
+    "suspendedBody": "Learning access is currently paused. Contact your administrator for assistance.",
+    "rejectedTitle": "Your registration was not approved.",
+    "rejectedBody": "Learning access is unavailable. Contact your administrator if you believe this was a mistake.",
+    "auditEmpty": "No administrative changes yet.",
+    "actor": "Administrator",
+    "target": "User",
+    "action": "Action",
+    "details": "User details",
+    "pendingDescription": "Review new accounts before granting learning access.",
+    "self": "Use your own account preferences to edit your profile. You cannot change your own access here.",
+    "authFailed": "Unable to sign in. Check your details and try again.",
+    "signupFailed": "Unable to create your account. Please try again.",
+    "registrationUnavailable": "Registration is temporarily unavailable. Please contact the administrator.",
+    "signupNote": "New accounts require administrator approval. No email confirmation is required.",
+    "learning": "Learning signals",
+    "snapshotDate": "Saved learning summary as of",
+    "practiceDays": "Practice days in the summary week",
+    "weakAreas": "Recurring learning patterns",
+    "noMemory": "No saved learning summary is available.",
+    "noPatterns": "Not enough repeated feedback to identify a pattern.",
+    "timeNote": "Account timestamps are shown in UTC."
   }
 }

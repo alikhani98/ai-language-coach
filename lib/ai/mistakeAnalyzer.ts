@@ -2,6 +2,7 @@ import { buildAnalysisPrompt, mistakeAnalysisSchemaHint } from "@/lib/ai/prompts
 import { coachRole } from "@/lib/ai/prompts/context";
 import { getAIProvider } from "@/lib/ai/provider";
 import { mistakeAnalysisSchema } from "@/lib/validations/mistake";
+import type { LearnerContext } from "@/lib/learner/context";
 
 export type MistakeCategory =
   | "grammar"
@@ -21,6 +22,7 @@ export type MistakeAnalysisInput = {
   sentence: string;
   context?: string;
   interfaceLanguage?: string;
+  learnerContext?: LearnerContext;
 };
 
 export async function analyzeMistake(
