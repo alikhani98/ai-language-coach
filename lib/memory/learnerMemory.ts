@@ -15,8 +15,8 @@ export const memorySnapshotSchema = z.object({
   totals: totalsSchema,
   current: weekSchema,
   previous: weekSchema,
-  areas: z.record(z.enum(memoryAreas), areaSchema),
-  topics: z.record(z.enum(conversationTopics), topicSchema),
+  areas: z.partialRecord(z.enum(memoryAreas), areaSchema),
+  topics: z.partialRecord(z.enum(conversationTopics), topicSchema),
 }).strict().superRefine((snapshot, ctx) => {
   for (const area of Object.values(snapshot.areas)) {
     if (area && (area.sessions > area.total || area.recent + area.previous > area.total
