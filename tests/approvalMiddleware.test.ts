@@ -38,6 +38,7 @@ const profile = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv("APP_URL", "https://example.test");
   mocks.getUser.mockResolvedValue({
     data: { user: { id: "owner", app_metadata: {} } },
   });
