@@ -68,6 +68,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 Server-only variables:
 
 ```bash
+APP_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 AI_PROVIDER=openrouter
 OPENROUTER_API_KEY=
@@ -77,6 +78,11 @@ AI_CONVERSATION_MODEL=
 AI_ANALYSIS_MODEL=
 AI_TIMEOUT_MS=20000
 ```
+
+`APP_URL` is required in production and must be the public HTTPS origin without
+a path or port (for example, `https://zaban.54i.ir`). Configure it in the
+DirectAdmin Node.js application's environment. It is used by middleware for
+canonical redirects and must not be prefixed with `NEXT_PUBLIC_`.
 
 Optional AI provider variables:
 

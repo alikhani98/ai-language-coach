@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/env";
+import { getCanonicalAppOrigin } from "@/lib/app-url";
 import { accountDestination } from "@/lib/admin/model";
 import { isProfileComplete } from "@/lib/daily/lesson";
 
@@ -91,14 +92,16 @@ export async function updateSession(request: NextRequest) {
     pathname === onboardingRoute ||
     adminRoute ||
     statusRoute;
+
   function go(destination: string) {
-    const url = request.nextUrl.clone();
-    url.pathname = destination;
-    url.search = "";
+    const origin = getCanonicalAppOrigin() ?? request.nextUrl.origin;
+    const url = new URL(destination, origin);
     const response = NextResponse.redirect(url);
+
     supabaseResponse.cookies
       .getAll()
       .forEach((cookie) => response.cookies.set(cookie));
+
     return response;
   }
   if (!user && protectedRoute) return go("/login");

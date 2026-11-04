@@ -20,6 +20,7 @@ const publicEnvSchema = z.object({
 });
 
 const serverEnvSchema = publicEnvSchema.extend({
+  APP_URL: optionalUrl(),
   SUPABASE_SERVICE_ROLE_KEY: optionalString(),
   AI_PROVIDER: z.enum(["openrouter", "local"]).default("openrouter"),
   OPENROUTER_API_KEY: optionalString(),
@@ -39,6 +40,7 @@ export const publicEnv = publicEnvSchema.parse({
 
 export const serverEnv = serverEnvSchema.parse({
   ...publicEnv,
+  APP_URL: process.env.APP_URL,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   AI_PROVIDER: process.env.AI_PROVIDER,
   OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
