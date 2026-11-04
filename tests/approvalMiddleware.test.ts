@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.hoisted(() => vi.resetModules());
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
@@ -38,15 +38,28 @@ const profile = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv("APP_URL", "https://example.test");
   mocks.getUser.mockResolvedValue({
     data: { user: { id: "owner", app_metadata: {} } },
   });
   mocks.eq.mockReturnValue({ maybeSingle: mocks.maybeSingle });
   mocks.maybeSingle.mockResolvedValue({ data: profile, error: null });
 });
-const request = (path: string) =>
-  new NextRequest(`https://example.test${path}`);
+afterEach(() => vi.unstubAllEnvs());
+const request = (path: string, origin = "https://example.test") =>
+  new NextRequest(`${origin}${path}`);
 describe("middleware account routing", () => {
+  it("uses APP_URL rather than Passenger's internal request origin", async () => {
+    vi.stubEnv("APP_URL", "https://zaban.54i.ir");
+    vi.stubEnv("NODE_ENV", "production");
+    mocks.getUser.mockResolvedValue({ data: { user: null } });
+
+    expect(
+      (await updateSession(request("/dashboard", "http://localhost:3000")))
+        .headers.get("location"),
+    ).toBe("https://zaban.54i.ir/login");
+
+  });
   it.each([
     ["pending", "/approval-pending"],
     ["suspended", "/account-suspended"],
