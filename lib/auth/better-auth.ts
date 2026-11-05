@@ -1,5 +1,6 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getMySqlDatabase } from "@/lib/db/client";
@@ -39,6 +40,9 @@ function createBetterAuthInstance() {
       enabled: true,
       disableSignUp: true,
       requireEmailVerification: false,
+    },
+    advanced: {
+      database: { generateId: () => randomUUID() },
     },
     telemetry: {
       enabled: false,
