@@ -18,6 +18,7 @@ CREATE TABLE `app_users` (
   CONSTRAINT `app_users_provider_subject_unique` UNIQUE (`auth_provider`, `auth_subject_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `users_profile` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -39,6 +40,7 @@ CREATE TABLE `users_profile` (
   INDEX `users_profile_status_created_idx` (`status`, `created_at`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `daily_lessons` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -59,6 +61,7 @@ CREATE TABLE `daily_lessons` (
   INDEX `daily_lessons_user_status_idx` (`user_id`, `generation_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `conversations` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -78,6 +81,7 @@ CREATE TABLE `conversations` (
   INDEX `conversations_user_updated_at_idx` (`user_id`, `updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `conversation_messages` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `conversation_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -99,6 +103,7 @@ CREATE TABLE `conversation_messages` (
   INDEX `conversation_messages_memory_request_idx` (`user_id`, `conversation_id`, `request_id`, `role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `mistakes` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -120,6 +125,7 @@ CREATE TABLE `mistakes` (
   INDEX `mistakes_user_dismissed_idx` (`user_id`, `dismissed_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `practice_logs` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -132,6 +138,7 @@ CREATE TABLE `practice_logs` (
   INDEX `practice_logs_user_created_at_idx` (`user_id`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `learning_memory` (
   `user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `schema_version` INT NOT NULL DEFAULT 1,
@@ -145,6 +152,7 @@ CREATE TABLE `learning_memory` (
   CONSTRAINT `learning_memory_user_fk` FOREIGN KEY (`user_id`) REFERENCES `app_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--> statement-breakpoint
 CREATE TABLE `admin_audit_logs` (
   `id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `admin_user_id` CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NULL,
