@@ -117,6 +117,9 @@ export async function buildAdminBootstrap({ email, name, password }) {
   };
 }
 
+export function parseBootstrapCredentials(input) {
+  return JSON.parse(input.replace(/^\uFEFF/, ""));
+}
 async function main() {
   const outputArg = process.argv[2];
 
@@ -146,7 +149,7 @@ async function main() {
     }
   }
 
-  const credentials = JSON.parse(input);
+  const credentials = parseBootstrapCredentials(input);
   const { sql } = await buildAdminBootstrap(credentials);
 
   const handle = await open(output, "wx", 0o600);

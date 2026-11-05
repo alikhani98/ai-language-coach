@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { verifyPassword } from "better-auth/crypto";
-import { buildAdminBootstrap } from "../scripts/prepare-admin-bootstrap.mjs";
+import { buildAdminBootstrap, parseBootstrapCredentials } from "../scripts/prepare-admin-bootstrap.mjs";
 
 const valid = {
   email: "ADMIN@EXAMPLE.COM",
@@ -9,6 +9,18 @@ const valid = {
 };
 
 describe("offline administrator bootstrap", () => {
+  it("accepts JSON with and without UTF-8 BOM", () => {
+    const json = JSON.stringify(valid);
+
+    expect(
+      parseBootstrapCredentials("\uFEFF" + json),
+    ).toEqual(valid);
+
+    expect(
+      parseBootstrapCredentials(json),
+    ).toEqual(valid);
+  });
+
   it("produces transactional SQL using a verifiable Better Auth hash", async () => {
     const result = await buildAdminBootstrap(valid);
 
