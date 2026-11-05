@@ -13,7 +13,7 @@ CREATE TABLE `account` (
 	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
 	`updated_at` timestamp(3) NOT NULL,
 	CONSTRAINT `account_id` PRIMARY KEY(`id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 --> statement-breakpoint
 CREATE TABLE `session` (
 	`id` varchar(36) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `session` (
 	`user_id` varchar(36) NOT NULL,
 	CONSTRAINT `session_id` PRIMARY KEY(`id`),
 	CONSTRAINT `session_token_unique` UNIQUE(`token`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 --> statement-breakpoint
 CREATE TABLE `user` (
 	`id` varchar(36) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE `user` (
 	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
 	CONSTRAINT `user_id` PRIMARY KEY(`id`),
 	CONSTRAINT `user_email_unique` UNIQUE(`email`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 --> statement-breakpoint
 CREATE TABLE `verification` (
 	`id` varchar(36) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE `verification` (
 	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
 	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
 	CONSTRAINT `verification_id` PRIMARY KEY(`id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 --> statement-breakpoint
 ALTER TABLE `account` ADD CONSTRAINT `account_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `session` ADD CONSTRAINT `session_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
