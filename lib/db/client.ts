@@ -3,7 +3,10 @@ import "server-only";
 import { drizzle, type MySql2Database } from "drizzle-orm/mysql2";
 import { createPool, type Pool } from "mysql2/promise";
 import { getMySqlPoolOptions } from "@/lib/db/config";
-import * as schema from "@/lib/db/schema";
+import * as domainSchema from "@/lib/db/schema";
+import * as authSchema from "@/lib/db/auth-schema";
+
+const schema = { ...domainSchema, ...authSchema };
 
 let pool: Pool | undefined;
 let database: MySql2Database<typeof schema> | undefined;
