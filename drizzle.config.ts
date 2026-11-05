@@ -4,7 +4,7 @@ import { defineConfig } from "drizzle-kit";
 // included in package scripts, so this project cannot apply a migration by accident.
 export default defineConfig({
   dialect: "mysql",
-  schema: "./lib/db/schema.ts",
+  schema: ["./lib/db/schema.ts", "./lib/db/auth-schema.ts"],
   out: "./drizzle",
   dbCredentials: {
     host: process.env.MYSQL_HOST ?? "127.0.0.1",
