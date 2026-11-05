@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --isolate=false --maxWorkers=1",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:validate": "node scripts/validate-mysql-migrations.mjs",
     "smoke:ai": "node scripts/ai-provider-smoke.mjs"
   },
   "dependencies": {
@@ -17,7 +19,9 @@
     "@supabase/supabase-js": "^2.45.6",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.4",
     "lucide-react": "^0.468.0",
+    "mysql2": "^3.24.6",
     "next": "^15.5.28",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -33,6 +37,7 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.15.0",
     "eslint-config-next": "^15.5.28",
+    "drizzle-kit": "^0.31.11",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
