@@ -10,8 +10,7 @@ export async function changeUser(
   _state: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  if (isMySqlPreviewEnabled()) return { result: "failed" };
-  const { supabase } = await requireAdmin();
+  const { user, supabase } = await requireAdmin();
   const action = formData.get("action");
   const parsed = adminMutationSchema.safeParse({
     target: formData.get("target"),
@@ -32,6 +31,13 @@ export async function changeUser(
       : {}),
   });
   if (!parsed.success) return { result: "invalid" };
+  if (isMySqlPreviewEnabled()) {
+    const { mutateMySqlAdminUser } = await import("@/lib/mysql/admin");
+    const result = await mutateMySqlAdminUser(user.id, parsed.data);
+    if (result === "saved") revalidatePath("/", "layout");
+    return { result };
+  }
+  if (!supabase) return { result: "failed" };
   try {
     const { error } = await supabase.rpc("admin_change_user", {
       p_target: parsed.data.target,

@@ -1,5 +1,6 @@
 import "server-only";
 import { requireAdmin } from "@/lib/admin/auth";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import type { UserProfile } from "@/lib/actions/profile";
 import type { AccountStatus } from "@/lib/admin/model";
 export type AdminUser = UserProfile & {
@@ -32,7 +33,17 @@ export async function adminRead<T>(
   name: string,
   args: Record<string, unknown> = {},
 ): Promise<T | null> {
+  if (isMySqlPreviewEnabled()) {
+    const { user } = await requireAdmin();
+    try {
+      const { readMySqlAdminData } = await import("@/lib/mysql/admin");
+      return await readMySqlAdminData(user.id, name, args) as unknown as T | null;
+    } catch {
+      return null;
+    }
+  }
   const { supabase } = await requireAdmin();
+  if (!supabase) return null;
   try {
     const { data, error } = await supabase
       .rpc(name, args)

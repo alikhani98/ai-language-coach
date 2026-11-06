@@ -274,8 +274,8 @@ export async function sendConversationMessage(
   }
 
   if (isMySqlPreviewEnabled()) {
-    const profile = await requireProfile();
-    return { error: getMessages(profile.interface_language).actions.conversationReplyFailed };
+    const { sendMySqlPreviewMessage } = await import("@/lib/mysql/conversation-controller");
+    return sendMySqlPreviewMessage(formData);
   }
   const { profile, thread } = await getConversationContext(
     parsed.data.conversationId,
@@ -430,8 +430,8 @@ export async function endConversation(
     return { error: "Conversation was not found." };
   }
   if (isMySqlPreviewEnabled()) {
-    const profile = await requireProfile();
-    return { error: getMessages(profile.interface_language).actions.conversationPreviousAnswering };
+    const { endMySqlPreviewConversation } = await import("@/lib/mysql/conversation-controller");
+    return endMySqlPreviewConversation(formData);
   }
   const { profile, thread } = await getConversationContext(parsed.data);
   const messages = getMessages(profile.interface_language);

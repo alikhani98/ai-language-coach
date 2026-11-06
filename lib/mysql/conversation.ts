@@ -3,7 +3,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { getMySqlDatabase } from "@/lib/db/client";
-import { conversationMessages, conversations } from "@/lib/db/schema";
+import { appUsers, usersProfile, conversationMessages, conversations } from "@/lib/db/schema";
 import {
   mapConversationMessageRow,
   mapConversationRow,
@@ -123,16 +123,26 @@ export function parseMySqlExchangeInput(input: unknown) {
 export async function appendMySqlConversationExchange(
   appUserId: string,
   input: unknown,
+  lease?: string,
 ): Promise<void> {
   assertAppUserId(appUserId);
+  if (!lease || !UUID.test(lease)) throw new Error("Invalid generation lease.");
   const { user, assistant } = parseMySqlExchangeInput(input);
   await getMySqlDatabase().transaction(async (tx) => {
+    // Revocation can happen during AI generation: fail closed before persisting.
+    const actor = await tx.select({ id: appUsers.id }).from(appUsers)
+      .innerJoin(usersProfile, eq(usersProfile.userId, appUsers.id))
+      .where(and(eq(appUsers.id, appUserId), eq(appUsers.authProvider, "better_auth"),
+        eq(usersProfile.status, "active")))
+      .for("update").limit(1);
+    if (!actor.length) throw new Error("Application access revoked.");
     const owned = await tx.select({ id: conversations.id }).from(conversations)
       .where(and(
         eq(conversations.id, user.conversationId),
         eq(conversations.userId, appUserId),
         eq(conversations.status, "active"),
-      )).limit(1);
+        eq(conversations.activeRequestId, lease),
+      )).for("update").limit(1);
     if (!owned[0]) throw new Error("Conversation is unavailable.");
 
     const existing = await tx.select({ id: conversationMessages.id })
@@ -151,7 +161,12 @@ export async function appendMySqlConversationExchange(
         corrections: assistant.corrections },
     ]);
     // Update is scoped to owner; no privileged columns are exposed to callers.
-    await tx.update(conversations).set({ updatedAt: sql`CURRENT_TIMESTAMP(3)` })
-      .where(and(eq(conversations.id, user.conversationId), eq(conversations.userId, appUserId)));
+    await tx.update(conversations).set({
+      updatedAt: sql`CURRENT_TIMESTAMP(3)`,
+      activeRequestId: null,
+      activeGenerationStartedAt: null,
+    }).where(and(eq(conversations.id, user.conversationId),
+      eq(conversations.userId, appUserId),
+      eq(conversations.activeRequestId, lease)));
   });
 }

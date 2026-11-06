@@ -4,11 +4,8 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
   if (isMySqlPreviewEnabled()) {
-    // Admin actions are deliberately not supported in this partial preview.
-    if (/^\/admin(?:\/|$)/.test(request.nextUrl.pathname)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-    // Server-side requireUser/requireProfile remain the access boundary.
+    // Each admin page and action enforces Better Auth + fresh MySQL admin role
+    // on the server. Middleware is intentionally not an authorization boundary.
     return NextResponse.next({ request });
   }
   return updateSession(request);
