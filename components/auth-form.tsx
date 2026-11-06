@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import { BookOpenText, CheckCircle2, ArrowRight, LoaderCircle } from "lucide-react";
 import { login, signup } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,42 @@ type AuthFormProps = {
   mode: "login" | "signup";
   message?: string;
   messages: Messages;
+  mysqlPreview?: boolean;
 };
 
-export function AuthForm({ mode, message, messages }: AuthFormProps) {
+export function AuthForm({ mode, message, messages, mysqlPreview = false }: AuthFormProps) {
   const isLogin = mode === "login";
   const [state, formAction, isPending] = useActionState(
     isLogin ? login : signup,
     {},
   );
+  const [previewError, setPreviewError] = useState<"authFailed" | undefined>();
+  const [previewPending, setPreviewPending] = useState(false);
+  const onPreviewSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    if (!mysqlPreview) return;
+    event.preventDefault();
+    if (!isLogin) return;
+    const form = new FormData(event.currentTarget);
+    setPreviewPending(true);
+    setPreviewError(undefined);
+    try {
+      const response = await fetch("/api/auth/sign-in/email", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: String(form.get("email") ?? ""),
+          password: String(form.get("password") ?? ""),
+          rememberMe: false,
+        }),
+      });
+      if (!response.ok) throw new Error("Login failed");
+      window.location.assign("/dashboard");
+    } catch {
+      setPreviewError("authFailed");
+      setPreviewPending(false);
+    }
+  };
 
   return (
     <div className="mx-auto grid w-full max-w-5xl items-center gap-8 py-3 sm:py-10 lg:min-h-[calc(100svh-12rem)] lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
@@ -70,13 +98,23 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
             {message}
           </p>
         ) : null}
-        {state.error ? (
+        {(mysqlPreview ? previewError : state.error) ? (
           <p role="alert" className="mt-4 rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {messages.admin[state.error as "authFailed" | "signupFailed" | "registrationUnavailable"] ?? messages.admin.authFailed}
+            {messages.admin[(mysqlPreview ? previewError : state.error) as "authFailed" | "signupFailed" | "registrationUnavailable"] ?? messages.admin.authFailed}
           </p>
         ) : null}
         {!isLogin ? <p className="mt-4 text-sm text-muted-foreground">{messages.admin.signupNote}</p> : null}
-        <form action={formAction} className="mt-7 space-y-5">
+        {mysqlPreview && !isLogin ? (
+          <p role="status" className="mt-7 text-sm text-muted-foreground">
+            {messages.admin.registrationUnavailable}
+          </p>
+        ) : (
+        <form
+          action={mysqlPreview ? "/api/auth/sign-in/email" : formAction}
+          method={mysqlPreview ? "post" : undefined}
+          onSubmit={mysqlPreview ? onPreviewSubmit : undefined}
+          className="mt-7 space-y-5"
+        >
           <div className="space-y-2">
             <Label htmlFor="email">{messages.common.email}</Label>
             <Input
@@ -102,16 +140,17 @@ export function AuthForm({ mode, message, messages }: AuthFormProps) {
               required
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-            {isPending
+          <Button type="submit" className="w-full" disabled={isPending || previewPending}>
+            {isPending || previewPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+            {isPending || previewPending
               ? messages.common.pleaseWait
               : isLogin
                 ? messages.auth.loginSubmit
                 : messages.auth.signupSubmit}
-            {!isPending ? <ArrowRight className="h-4 w-4 rtl:rotate-180" /> : null}
+            {!isPending && !previewPending ? <ArrowRight className="h-4 w-4 rtl:rotate-180" /> : null}
           </Button>
         </form>
+        )}
         <p className="mt-4 text-center text-sm text-muted-foreground">
           {isLogin ? messages.auth.noAccount : messages.auth.hasAccount}{" "}
           <Link

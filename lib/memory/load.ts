@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import { getLocalDateKey } from "@/lib/daily/date";
 import { buildLearnerMemory, type LearnerMemory } from "@/lib/memory/learnerMemory";
 import type { UserProfile } from "@/lib/actions/profile";
@@ -10,6 +11,18 @@ export type LearningMemoryResult =
 // Internal server module, not a callable Server Action. Accept only requireProfile's
 // profile. RLS and the owner check also protect against an accidentally wrong ID.
 export async function loadLearningMemory(profile: UserProfile, refresh = false): Promise<LearningMemoryResult> {
+  if (isMySqlPreviewEnabled()) {
+    try {
+      const [{ headers }, { resolveActiveBetterAuthSession }, { loadMySqlLearningMemoryCache }] = await Promise.all([
+        import("next/headers"), import("@/lib/auth/session"), import("@/lib/mysql/memory-cache"),
+      ]);
+      const identity = await resolveActiveBetterAuthSession(await headers());
+      if (!identity || identity.appUserId !== profile.user_id || refresh) return { status: "unavailable" };
+      return loadMySqlLearningMemoryCache(identity.appUserId, profile.timezone);
+    } catch {
+      return { status: "unavailable" };
+    }
+  }
   try {
     const supabase = await createClient();
     const { data: auth, error: authError } = await supabase.auth.getUser();

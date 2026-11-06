@@ -1,3 +1,4 @@
 import { AuthForm } from "@/components/auth-form";
 import { getMessages } from "@/lib/i18n/config";
-export default function LoginPage() { return <AuthForm mode="login" messages={getMessages("en")} />; }
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
+export default function LoginPage() { return <AuthForm mode="login" messages={getMessages("en")} mysqlPreview={isMySqlPreviewEnabled()} />; }

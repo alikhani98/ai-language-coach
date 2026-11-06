@@ -16,6 +16,7 @@ import {
   type DailyLesson,
 } from "@/lib/daily/lesson";
 import { createClient } from "@/lib/supabase/server";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import { getMessages } from "@/lib/i18n/config";
 
 type LessonActionState = {
@@ -29,6 +30,10 @@ const lessonColumns =
   "id,user_id,date,words,sentence,reading_text,speaking_task,completed,generation_status,created_at";
 
 async function fetchLesson(userId: string, date: string) {
+  if (isMySqlPreviewEnabled()) {
+    const { getMySqlDailyLesson } = await import("@/lib/mysql/daily-lesson");
+    return getMySqlDailyLesson(userId, date);
+  }
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("daily_lessons")
@@ -93,6 +98,10 @@ export async function generateTodaysLesson(
   previousState?: LessonActionState,
 ): Promise<LessonActionState> {
   void previousState;
+  if (isMySqlPreviewEnabled()) {
+    const { generateMySqlPreviewDailyLesson } = await import("@/lib/mysql/preview-daily-actions");
+    return generateMySqlPreviewDailyLesson();
+  }
   const { profile, today } = await getLessonContext();
   const messages = getMessages(profile.interface_language);
   const existing = await fetchLesson(profile.user_id, today);
@@ -204,6 +213,10 @@ export async function finishTodaysLesson(
   previousState?: LessonActionState,
 ): Promise<LessonActionState> {
   void previousState;
+  if (isMySqlPreviewEnabled()) {
+    const { finishMySqlPreviewDailyLesson } = await import("@/lib/mysql/preview-daily-actions");
+    return finishMySqlPreviewDailyLesson();
+  }
   const { profile, today } = await getLessonContext();
   const messages = getMessages(profile.interface_language);
   const lesson = await fetchLesson(profile.user_id, today);

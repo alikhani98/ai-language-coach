@@ -1,10 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import type { UserProfile } from "@/lib/actions/profile";
 import { buildLearnerContext } from "@/lib/learner/context";
 import { loadLearningMemory } from "@/lib/memory/load";
 
 // Only call with the profile returned by requireProfile; use the session client and RLS.
 export async function loadLearnerContext(profile: UserProfile) {
+  if (isMySqlPreviewEnabled()) {
+    const [{ headers }, { resolveActiveBetterAuthSession }, { loadMySqlLearnerContext }] = await Promise.all([
+      import("next/headers"), import("@/lib/auth/session"), import("@/lib/mysql/learner-context"),
+    ]);
+    const identity = await resolveActiveBetterAuthSession(await headers());
+    if (!identity || identity.appUserId !== profile.user_id) throw new Error("Unauthorized learner context.");
+    const context = await loadMySqlLearnerContext(profile);
+    const memory = await loadLearningMemory(profile);
+    return { ...context, learningMemory: memory.status === "ready" ? memory.memory : undefined };
+  }
   const memory = await loadLearningMemory(profile);
   const withMemory = (context: ReturnType<typeof buildLearnerContext>) => ({
     ...context,

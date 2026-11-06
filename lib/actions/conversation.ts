@@ -19,6 +19,7 @@ import {
   type ConversationThread,
 } from "@/lib/conversation/model";
 import { createClient } from "@/lib/supabase/server";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import { getMessages } from "@/lib/i18n/config";
 import {
   conversationIdSchema,
@@ -171,6 +172,10 @@ async function releaseGeneration(conversation: Conversation, requestId: string) 
 
 export async function listRecentConversations() {
   const profile = await requireProfile();
+  if (isMySqlPreviewEnabled()) {
+    const { listMySqlConversations } = await import("@/lib/mysql/conversation");
+    return listMySqlConversations(profile.user_id, 8);
+  }
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("conversations")
@@ -194,6 +199,10 @@ export async function getConversation(conversationId: string) {
   }
 
   const profile = await requireProfile();
+  if (isMySqlPreviewEnabled()) {
+    const { getMySqlConversationThread } = await import("@/lib/mysql/conversation");
+    return getMySqlConversationThread(profile.user_id, parsed.data);
+  }
   return fetchThread(profile.user_id, parsed.data);
 }
 
@@ -210,6 +219,17 @@ export async function startConversation(
     return { error: messages.actions.conversationChooseTopic };
   }
 
+  if (isMySqlPreviewEnabled()) {
+    try {
+      const { createMySqlConversation } = await import("@/lib/mysql/conversation");
+      const thread = await createMySqlConversation(profile.user_id, parsed.data);
+      if (!thread) throw new Error("Conversation unavailable.");
+      revalidatePath("/conversation");
+      return { conversationId: thread.conversation.id, thread, success: messages.actions.conversationStarted };
+    } catch {
+      return { error: messages.actions.conversationChooseTopic };
+    }
+  }
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("conversations")
@@ -253,6 +273,10 @@ export async function sendConversationMessage(
     return { error: parsed.error.issues[0]?.message ?? "Check your message." };
   }
 
+  if (isMySqlPreviewEnabled()) {
+    const profile = await requireProfile();
+    return { error: getMessages(profile.interface_language).actions.conversationReplyFailed };
+  }
   const { profile, thread } = await getConversationContext(
     parsed.data.conversationId,
   );
@@ -405,7 +429,10 @@ export async function endConversation(
   if (!parsed.success) {
     return { error: "Conversation was not found." };
   }
-
+  if (isMySqlPreviewEnabled()) {
+    const profile = await requireProfile();
+    return { error: getMessages(profile.interface_language).actions.conversationPreviousAnswering };
+  }
   const { profile, thread } = await getConversationContext(parsed.data);
   const messages = getMessages(profile.interface_language);
   const supabase = await createClient();

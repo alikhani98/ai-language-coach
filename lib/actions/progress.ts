@@ -8,6 +8,7 @@ import {
   type PracticeActivity,
 } from "@/lib/progress/model";
 import { createClient } from "@/lib/supabase/server";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 
 export type RecentActivity = {
   id: string;
@@ -18,6 +19,10 @@ export type RecentActivity = {
 
 export async function getProgressData() {
   const profile = await requireProfile();
+  if (isMySqlPreviewEnabled()) {
+    const { getMySqlProgressData } = await import("@/lib/mysql/progress");
+    return getMySqlProgressData(profile.user_id, profile.timezone);
+  }
   const supabase = await createClient();
   const [lessonsResult, conversationsResult, messagesResult, mistakesResult] =
     await Promise.all([

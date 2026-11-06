@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/auth";
 import { adminMutationSchema } from "@/lib/admin/model";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 export type AdminActionState = {
   result?: "saved" | "invalid" | "conflict" | "failed";
 };
@@ -9,6 +10,7 @@ export async function changeUser(
   _state: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  if (isMySqlPreviewEnabled()) return { result: "failed" };
   const { supabase } = await requireAdmin();
   const action = formData.get("action");
   const parsed = adminMutationSchema.safeParse({

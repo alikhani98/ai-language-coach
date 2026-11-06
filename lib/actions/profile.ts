@@ -15,6 +15,7 @@ import { isProfileComplete } from "@/lib/daily/lesson";
 import type { InterfaceLanguage } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/config";
 import type { ThemePreference } from "@/lib/theme/config";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 
 export type ProfileActionState = {
   error?: string;
@@ -46,6 +47,10 @@ function parseProfileForm(formData: FormData) {
 
 export async function getProfile(): Promise<UserProfile | null> {
   const user = await requireUser();
+  if (isMySqlPreviewEnabled()) {
+    const { getMySqlProfile } = await import("@/lib/mysql/profile");
+    return getMySqlProfile(user.id);
+  }
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("users_profile")
@@ -86,6 +91,15 @@ export async function createProfile(
     };
   }
 
+  if (isMySqlPreviewEnabled()) {
+    try {
+      const { updateMySqlProfile } = await import("@/lib/mysql/profile-write");
+      await updateMySqlProfile(user.id, parsed.data);
+    } catch {
+      return { error: getMessages(parsed.data.interface_language).actions.profileInvalid };
+    }
+    redirect("/dashboard");
+  }
   const supabase = await createClient();
   const { error } = await supabase.from("users_profile").update({
     level: parsed.data.level,
@@ -116,6 +130,15 @@ export async function updateProfile(
     };
   }
 
+  if (isMySqlPreviewEnabled()) {
+    try {
+      const { updateMySqlProfile } = await import("@/lib/mysql/profile-write");
+      await updateMySqlProfile(user.id, parsed.data);
+    } catch {
+      return { error: getMessages(parsed.data.interface_language).actions.profileInvalid };
+    }
+    redirect("/dashboard");
+  }
   const supabase = await createClient();
   const { error } = await supabase
     .from("users_profile")
@@ -146,6 +169,12 @@ export async function updateInterfaceLanguage(formData: FormData) {
     return;
   }
 
+  if (isMySqlPreviewEnabled()) {
+    const { updateMySqlInterfaceLanguage } = await import("@/lib/mysql/preferences");
+    await updateMySqlInterfaceLanguage(user.id, parsed.data);
+    revalidatePath("/", "layout");
+    return;
+  }
   const supabase = await createClient();
   await supabase
     .from("users_profile")
@@ -165,6 +194,12 @@ export async function updateThemePreference(formData: FormData) {
     return;
   }
 
+  if (isMySqlPreviewEnabled()) {
+    const { updateMySqlThemePreference } = await import("@/lib/mysql/preferences");
+    await updateMySqlThemePreference(user.id, parsed.data);
+    revalidatePath("/", "layout");
+    return;
+  }
   const supabase = await createClient();
   await supabase
     .from("users_profile")

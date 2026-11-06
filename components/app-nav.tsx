@@ -2,6 +2,8 @@ import { isProfileComplete } from "@/lib/daily/lesson";
 import Link from "next/link";
 import { BookOpenText, LogOut, Settings2 } from "lucide-react";
 import { logout } from "@/lib/actions/auth";
+import { MySqlPreviewLogout } from "@/components/mysql-preview-logout";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import { getCurrentUser } from "@/lib/auth/user";
 import { getProfile } from "@/lib/actions/profile";
 import { Button } from "@/components/ui/button";
@@ -48,7 +50,7 @@ export async function AppNav() {
               </span>
             </Link>
 
-            {user?.app_metadata?.role === "admin" &&
+            {!isMySqlPreviewEnabled() && user?.app_metadata?.role === "admin" &&
             profile?.status === "active" ? (
               <Link
                 className="inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium"
@@ -91,27 +93,30 @@ export async function AppNav() {
                       {messages.nav.mistakes}
                     </Link>
                   ) : null}
-                  <form action={logout}>
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      {messages.nav.logout}
-                    </Button>
-                  </form>
+                  {isMySqlPreviewEnabled() ? (
+                    <MySqlPreviewLogout label={messages.nav.logout} />
+                  ) : (
+                    <form action={logout}>
+                      <Button type="submit" variant="ghost" size="sm" className="w-full justify-start">
+                        <LogOut className="h-4 w-4" />
+                        {messages.nav.logout}
+                      </Button>
+                    </form>
+                  )}
                 </div>
               </details>
             ) : user ? (
               <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
                 <ThemeSelector messages={messages} persistToProfile={false} />
-                <form action={logout}>
-                  <Button type="submit" variant="outline" size="sm">
-                    {messages.nav.logout}
-                  </Button>
-                </form>
+                {isMySqlPreviewEnabled() ? (
+                  <MySqlPreviewLogout label={messages.nav.logout} />
+                ) : (
+                  <form action={logout}>
+                    <Button type="submit" variant="outline" size="sm">
+                      {messages.nav.logout}
+                    </Button>
+                  </form>
+                )}
               </div>
             ) : (
               <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">

@@ -9,6 +9,7 @@ import {
   type Mistake,
 } from "@/lib/mistakes/model";
 import { createClient } from "@/lib/supabase/server";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import { getMessages } from "@/lib/i18n/config";
 import {
   conversationCorrectionSchema,
@@ -53,6 +54,7 @@ function mapCorrectionToMistake(
 
 export async function syncConversationCorrections() {
   const profile = await requireProfile();
+  if (isMySqlPreviewEnabled()) throw new Error("Bulk correction sync is not enabled in MySQL preview.");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("conversation_messages")
@@ -131,6 +133,11 @@ export async function syncConversationCorrectionsAction(
 
 export async function syncCorrectionsForMessage(sourceMessageId: string) {
   const profile = await requireProfile();
+  if (isMySqlPreviewEnabled()) {
+    const { syncMySqlMessageCorrections } = await import("@/lib/mysql/mistakes");
+    await syncMySqlMessageCorrections(profile.user_id, sourceMessageId);
+    return;
+  }
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("conversation_messages")
@@ -169,6 +176,10 @@ export async function syncCorrectionsForMessage(sourceMessageId: string) {
 
 export async function getMistakeNotebook(category?: string) {
   const profile = await requireProfile();
+  if (isMySqlPreviewEnabled()) {
+    const { getMySqlMistakeNotebook } = await import("@/lib/mysql/mistakes");
+    return getMySqlMistakeNotebook(profile.user_id, category);
+  }
   const parsedCategory = mistakeCategoryFilterSchema.safeParse(category);
   const supabase = await createClient();
   let query = supabase
@@ -200,6 +211,11 @@ export async function getMistakeNotebook(category?: string) {
 }
 
 export async function getWeakAreas(limit = 3) {
+  if (isMySqlPreviewEnabled()) {
+    const profile = await requireProfile();
+    const { getMySqlWeakAreas } = await import("@/lib/mysql/mistakes");
+    return getMySqlWeakAreas(profile.user_id, limit);
+  }
   const { countWeakAreas } = await import("@/lib/mistakes/model");
   const profile = await requireProfile();
   const supabase = await createClient();
@@ -232,6 +248,18 @@ export async function removeMistake(
     return { error: messages.actions.mistakeNotFound };
   }
 
+  if (isMySqlPreviewEnabled()) {
+    try {
+      const { dismissMySqlMistake } = await import("@/lib/mysql/mistakes");
+      await dismissMySqlMistake(profile.user_id, parsed.data);
+    } catch {
+      return { error: messages.actions.mistakeNotFound };
+    }
+    revalidatePath("/mistakes");
+    revalidatePath("/progress");
+    revalidatePath("/dashboard");
+    return { success: messages.actions.mistakeRemoved };
+  }
   const supabase = await createClient();
   const { error } = await supabase
     .from("mistakes")

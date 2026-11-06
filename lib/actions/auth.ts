@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { authSchema } from "@/lib/validations/auth";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 
 export type AuthActionState = {
   error?: string;
@@ -27,6 +28,7 @@ export async function login(
     };
   }
 
+  if (isMySqlPreviewEnabled()) return { error: "authFailed" };
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
@@ -49,6 +51,7 @@ export async function signup(
     };
   }
 
+  if (isMySqlPreviewEnabled()) return { error: "registrationUnavailable" };
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp(parsed.data);
 
@@ -64,6 +67,7 @@ export async function signup(
 }
 
 export async function logout() {
+  if (isMySqlPreviewEnabled()) throw new Error("Use Better Auth sign-out endpoint in preview.");
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
