@@ -97,6 +97,24 @@ describe("offline administrator bootstrap", () => {
       sql.indexOf("RELEASE_LOCK("),
     );
   });
+  it("checks the target table before the INSERT statement", async () => {
+    const { sql } = await buildAdminBootstrap(valid);
+
+    const first = sql.indexOf("INSERT INTO `user`");
+    const last = sql.indexOf("SET @zaban_created = ROW_COUNT();");
+    const insertStatement = sql.slice(first, last);
+
+    expect(sql.indexOf("INTO @zaban_bootstrap_empty;")).toBeLessThan(
+      sql.indexOf("START TRANSACTION;"),
+    );
+
+    expect(insertStatement).toContain(
+      "WHERE @zaban_bootstrap_lock = 1 AND @zaban_bootstrap_empty = 1;",
+    );
+
+    expect(insertStatement).not.toContain("NOT EXISTS");
+  });
+
   it("rejects invalid email and weak passwords", async () => {
     await expect(
       buildAdminBootstrap({ ...valid, email: "invalid" }),
