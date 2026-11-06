@@ -33,13 +33,16 @@ const serverEnvSchema = publicEnvSchema.extend({
   AI_TIMEOUT_MS: z.coerce.number().int().positive().max(45000).default(20000),
 });
 
-export const publicEnv = publicEnvSchema.parse({
+// Do not parse Supabase credentials at module import. A MySQL-only release must
+// be bootable without them. Accessing a legacy Supabase field still validates
+// all required legacy variables and fails closed when they are absent.
+const readPublic = () => publicEnvSchema.parse({
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 });
-
-export const serverEnv = serverEnvSchema.parse({
-  ...publicEnv,
+const readServer = () => serverEnvSchema.parse({
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   APP_URL: process.env.APP_URL,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   AI_PROVIDER: process.env.AI_PROVIDER,
@@ -51,4 +54,10 @@ export const serverEnv = serverEnvSchema.parse({
   AI_BASE_URL: process.env.AI_BASE_URL,
   LOCAL_AI_BASE_URL: process.env.LOCAL_AI_BASE_URL,
   AI_TIMEOUT_MS: process.env.AI_TIMEOUT_MS,
+});
+export const publicEnv: ReturnType<typeof readPublic> = new Proxy({} as ReturnType<typeof readPublic>, {
+  get: (_target, key) => Reflect.get(readPublic(), key),
+});
+export const serverEnv: ReturnType<typeof readServer> = new Proxy({} as ReturnType<typeof readServer>, {
+  get: (_target, key) => Reflect.get(readServer(), key),
 });

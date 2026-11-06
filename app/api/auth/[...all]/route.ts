@@ -12,10 +12,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function isEnabled(): boolean {
-  return (
-    process.env.NODE_ENV === "development" &&
-    process.env.ZABAN_BETTER_AUTH_DEV_ROUTE === "enabled"
-  );
+  // Controlled production cutover shares the same double opt-in as server data access.
+  if (process.env.NODE_ENV === "production") {
+    return process.env.ZABAN_DATA_BACKEND === "mysql" && process.env.ZABAN_CUTOVER_APPROVED === "yes";
+  }
+  return process.env.NODE_ENV === "development" && process.env.ZABAN_BETTER_AUTH_DEV_ROUTE === "enabled";
 }
 
 async function handle(request: Request): Promise<Response> {

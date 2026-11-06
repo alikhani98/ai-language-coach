@@ -8,6 +8,7 @@ import { getLocalDateKey } from "@/lib/daily/date";
 import { parseLessonContent } from "@/lib/daily/lesson";
 import { getMessages } from "@/lib/i18n/config";
 import { loadLearnerContext } from "@/lib/learner/load";
+import { refreshLearningMemory } from "@/lib/memory/load";
 import {
   claimMySqlDailyLesson,
   completeMySqlDailyLesson,
@@ -27,10 +28,6 @@ export async function generateMySqlPreviewDailyLesson() {
   }
   if (existing?.generation_status === "pending") {
     return { lesson: existing, error: m.actions.dailyPending };
-  }
-  // Failed claims require a separately verified atomic retry implementation.
-  if (existing?.generation_status === "failed") {
-    return { lesson: existing, error: m.actions.dailyPrepareFailed };
   }
 
   const { lesson, claimed } = await claimMySqlDailyLesson(profile.user_id, date);
@@ -86,6 +83,7 @@ export async function finishMySqlPreviewDailyLesson() {
   if (!updated?.completed) {
     return { lesson, error: m.actions.dailyNotReady };
   }
+  try { await refreshLearningMemory(profile); } catch { /* optional derived cache */ }
   revalidatePath("/dashboard");
   revalidatePath("/practice");
   revalidatePath("/progress");

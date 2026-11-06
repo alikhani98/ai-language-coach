@@ -3,6 +3,8 @@ import { getMessages, resolveInterfaceLanguage } from "@/lib/i18n/config";
 import { adminRead, type UserList as List } from "@/lib/admin/data";
 import { accountStatuses, userFiltersSchema } from "@/lib/admin/model";
 import { UserList, Pagination } from "@/components/admin/user-list";
+import { AdminCreateUser } from "@/components/admin/create-user";
+import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 export default async function UsersPage({
@@ -24,6 +26,7 @@ export default async function UsersPage({
   return (
     <section className="space-y-5">
       <h2 className="type-section">{m.users}</h2>
+      {isMySqlPreviewEnabled() ? <AdminCreateUser language={language} /> : null}
       <form className="grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto]">
         <label className="space-y-2 text-sm">
           {m.search}

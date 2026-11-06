@@ -54,6 +54,19 @@ export async function getMySqlDailyLesson(appUserId: string, date: string) {
 export async function claimMySqlDailyLesson(appUserId: string, date: string) {
   assertMySqlLessonKey(appUserId, date);
   const existing = await getMySqlDailyLesson(appUserId, date);
+  if (existing?.generation_status === "failed") {
+    // Retry a known failed generation under a row lock. Never steal pending work.
+    const reclaimed = await getMySqlDatabase().transaction(async (tx) => {
+      const rows = await tx.select({ id: dailyLessons.id, status: dailyLessons.generationStatus })
+        .from(dailyLessons).where(and(eq(dailyLessons.userId, appUserId), eq(dailyLessons.date, date)))
+        .for("update").limit(1);
+      if (rows[0]?.status !== "failed") return false;
+      await tx.update(dailyLessons).set({ generationStatus: "pending" })
+        .where(and(eq(dailyLessons.id, rows[0].id), eq(dailyLessons.generationStatus, "failed")));
+      return true;
+    });
+    return { lesson: await getMySqlDailyLesson(appUserId, date), claimed: reclaimed };
+  }
   if (existing) return { lesson: existing, claimed: false };
 
   try {

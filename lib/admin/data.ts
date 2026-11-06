@@ -25,7 +25,7 @@ export type AuditList = {
       | "user_rejected"
       | "user_suspended"
       | "user_reactivated"
-      | "user_updated";
+      | "user_updated" | "user_created";
     created_at: string;
   }[];
 };

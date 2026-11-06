@@ -50,7 +50,7 @@ export async function AppNav() {
               </span>
             </Link>
 
-            {!isMySqlPreviewEnabled() && user?.app_metadata?.role === "admin" &&
+            {user?.app_metadata?.role === "admin" &&
             profile?.status === "active" ? (
               <Link
                 className="inline-flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium"

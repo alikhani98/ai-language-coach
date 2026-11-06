@@ -133,6 +133,7 @@ export async function readMySqlAdminData(
         adminUserId: adminAuditLogs.adminUserId,
         targetUserId: adminAuditLogs.targetUserId,
         action: adminAuditLogs.action,
+        metadata: adminAuditLogs.metadata,
         createdAt: adminAuditLogs.createdAt,
       }).from(adminAuditLogs)
         .orderBy(desc(adminAuditLogs.createdAt), desc(adminAuditLogs.id))
@@ -141,7 +142,10 @@ export async function readMySqlAdminData(
     ]);
     return { total: Number(totals[0]?.value ?? 0), logs: rows.map((row) => ({
       id: row.id, admin_user_id: row.adminUserId, target_user_id: row.targetUserId,
-      action: row.action, created_at: formatMySqlUtcDateTime(row.createdAt),
+      action: row.action === "user_updated" &&
+        row.metadata && typeof row.metadata === "object" && "event" in row.metadata &&
+        row.metadata.event === "user_created" ? "user_created" as const : row.action,
+      created_at: formatMySqlUtcDateTime(row.createdAt),
     })) };
   }
   return null;

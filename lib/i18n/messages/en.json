@@ -439,6 +439,7 @@
     "user_rejected": "User rejected",
     "user_suspended": "User suspended",
     "user_reactivated": "User reactivated",
+    "user_created": "User created",
     "user_updated": "Profile updated",
     "confirm": "Confirm account change",
     "confirmBody": "This changes the learner’s access immediately. Review the account and action before confirming.",

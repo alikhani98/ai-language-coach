@@ -17,8 +17,13 @@ export async function loadLearningMemory(profile: UserProfile, refresh = false):
         import("next/headers"), import("@/lib/auth/session"), import("@/lib/mysql/memory-cache"),
       ]);
       const identity = await resolveActiveBetterAuthSession(await headers());
-      if (!identity || identity.appUserId !== profile.user_id || refresh) return { status: "unavailable" };
-      return loadMySqlLearningMemoryCache(identity.appUserId, profile.timezone);
+      if (!identity || identity.appUserId !== profile.user_id) return { status: "unavailable" };
+      if (!refresh) {
+        const cached = await loadMySqlLearningMemoryCache(identity.appUserId, profile.timezone);
+        if (cached.status === "ready") return cached;
+      }
+      const { rebuildMySqlLearningMemory } = await import("@/lib/mysql/memory-rebuild");
+      return rebuildMySqlLearningMemory(identity.appUserId, profile.timezone);
     } catch {
       return { status: "unavailable" };
     }

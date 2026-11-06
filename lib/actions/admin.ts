@@ -6,6 +6,23 @@ import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
 export type AdminActionState = {
   result?: "saved" | "invalid" | "conflict" | "failed";
 };
+
+/** Only an active Better Auth administrator can create users, and only in MySQL mode. */
+export async function createUser(_state: AdminActionState, formData: FormData): Promise<AdminActionState> {
+  if (!isMySqlPreviewEnabled()) return { result: "failed" };
+  const { user } = await requireAdmin();
+  try {
+    const { createMySqlAdminUser } = await import("@/lib/mysql/admin-create");
+    const result = await createMySqlAdminUser(user.id, {
+      email: formData.get("email"), name: formData.get("name"),
+      password: formData.get("password"), language: formData.get("language"),
+    });
+    if (result === "saved") revalidatePath("/admin/users");
+    return { result };
+  } catch {
+    return { result: "failed" };
+  }
+}
 export async function changeUser(
   _state: AdminActionState,
   formData: FormData,
