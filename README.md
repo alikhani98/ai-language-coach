@@ -8,7 +8,8 @@ A small AI-powered daily English coach focused on 10-15 minutes of consistent pr
 - TypeScript
 - Tailwind CSS
 - shadcn/ui-style primitives
-- Supabase Auth and PostgreSQL
+- Better Auth and MySQL for the production data path
+- Supabase compatibility modules retained for rollback only
 - Zod validation
 - Provider-based AI service layer with OpenRouter primary support
 - Bilingual UI support for English and Persian
@@ -40,9 +41,9 @@ npm install
 cp .env.example .env.local
 ```
 
-3. Fill in Supabase and AI provider keys in `.env.local`.
+3. Fill in MySQL, Better Auth, and AI provider values in `.env.local`.
 
-4. Apply the Supabase migration in `supabase/migrations`.
+4. Apply only the reviewed MySQL migrations for the target environment.
 
 5. Start the app:
 
@@ -52,31 +53,33 @@ npm run dev
 
 ## Current Phase
 
-Phase 9 adds a bilingual admin console and manual account approval. New accounts are pending; existing accounts retain access. Apply the new migration before deploying, disable hosted Supabase email confirmation for this workflow, and bootstrap a trusted admin. No approval email or service-role key is required. See [Phase 9 architecture, security and deployment steps](docs/PHASE_9_ADMIN.md). Production migration and browser acceptance remain deployment steps.
-
-Phase 8 adds a derived learner context, adaptive lesson prompts, bounded conversation memory, completion summaries, and task-specific model routing. The existing server actions, authentication, Supabase schema, and RLS remain the foundation. See `docs/phase-8.md` for architecture decisions, changed files, validation, and limitations.
+Production uses Better Auth and MySQL after the explicit MySQL cutover gates are
+set in the server environment. Supabase packages and migrations remain only for
+rollback compatibility; do not remove them without a separately reviewed
+retirement plan. The operational procedure is in
+[DirectAdmin / Passenger deployment](docs/PASSENGER_DEPLOYMENT.md).
 
 ## Environment Variables
-
-Client-side variables:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-```
 
 Server-only variables:
 
 ```bash
 APP_URL=
-SUPABASE_SERVICE_ROLE_KEY=
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_DATABASE=
+MYSQL_USER=
+MYSQL_PASSWORD=
+BETTER_AUTH_SECRET=
 AI_PROVIDER=openrouter
 OPENROUTER_API_KEY=
-AI_MODEL=
+AI_MODEL=openai/gpt-4o-mini
 AI_LESSON_MODEL=
 AI_CONVERSATION_MODEL=
 AI_ANALYSIS_MODEL=
 AI_TIMEOUT_MS=20000
+ZABAN_DATA_BACKEND=mysql
+ZABAN_CUTOVER_APPROVED=yes
 ```
 
 `APP_URL` is required in production and must be the public HTTPS origin without
@@ -95,7 +98,9 @@ OpenRouter is the default production provider. The local provider is optional an
 
 Task-specific model variables are optional and fall back to `AI_MODEL`. Progress summaries use the analysis model. No model identifiers are hardcoded. `AI_TIMEOUT_MS` accepts 1–45000 milliseconds per attempt; transient transport, timeout, rate-limit, and server failures receive one retry after 250 milliseconds. The timeout covers response-body consumption as well as connection setup. Configuration errors and malformed output are not retried.
 
-Do not expose `SUPABASE_SERVICE_ROLE_KEY` or `OPENROUTER_API_KEY` in client components, browser bundles, logs, or public documentation examples.
+Do not expose `MYSQL_PASSWORD`, `BETTER_AUTH_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`,
+or `OPENROUTER_API_KEY` in client components, browser bundles, logs, or public
+documentation examples.
 
 ## UI Languages
 
@@ -147,11 +152,8 @@ npm run smoke:ai
 
 The smoke test validates daily lesson and conversation response schemas without writing to the database and without printing API keys.
 
-## Supabase Deployment Checklist
+## Deployment
 
-1. Apply migrations in order from `supabase/migrations`.
-2. Verify tables: `users_profile`, `daily_lessons`, `conversations`, `conversation_messages`, `mistakes`, `practice_logs`.
-3. Verify RLS is enabled on all user-owned tables.
-4. Verify policies restrict access to `auth.uid() = user_id`.
-5. Verify `public.insert_assistant_conversation_message` exists.
-6. Verify direct user inserts into `conversation_messages` only allow user-role messages.
+Use the [DirectAdmin / Passenger deployment](docs/PASSENGER_DEPLOYMENT.md)
+procedure. It includes server-only variables, backup, build artifacts, OpenRouter
+JSON smoke validation, and rollback.
