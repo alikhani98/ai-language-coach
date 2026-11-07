@@ -74,9 +74,14 @@ const tracedRuntimePackages = [
   "@img/sharp-linux-x64", "@img/sharp-libvips-linux-x64",
 ];
 for (const packageName of tracedRuntimePackages) {
-  const source = path.join(root, "node_modules", packageName);
+  let packageJson;
+  try {
+    packageJson = require.resolve(`${packageName}/package.json`, { paths: [root] });
+  } catch {
+    continue;
+  }
+  const source = path.dirname(packageJson);
   const target = path.join(standalone, "node_modules", packageName);
-  try { await access(source); } catch { continue; }
   // Next tracing can leave a package directory present but incomplete (for
   // example mysql2's nested iconv-lite -> safer-buffer dependency). Merge the
   // explicitly allow-listed runtime package instead of trusting directory
