@@ -28,6 +28,7 @@ const runtimeImports = [
   ["sharp", () => isolatedRequire("sharp")],
 ];
 for (const [name, load] of runtimeImports) {
+  if (process.env.STANDALONE_IMPORT_TARGET && process.env.STANDALONE_IMPORT_TARGET !== name) continue;
   try {
     await load();
     console.log(`Isolated runtime import passed: ${name}.`);

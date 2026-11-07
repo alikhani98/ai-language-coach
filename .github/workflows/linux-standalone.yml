@@ -68,11 +68,30 @@ jobs:
           test ! -e "$STANDALONE_ISOLATED_DIR/.env.production"
           test -f "$STANDALONE_ISOLATED_DIR/release-manifest.json"
 
-      - name: Validate imports from isolated directory
+      - name: Validate mysql2 imports from isolated directory
         shell: bash
         run: |
           set -euo pipefail
-          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" NODE_PATH="" node scripts/test-standalone.mjs
+          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" STANDALONE_IMPORT_TARGET="mysql2/promise" NODE_PATH="" node scripts/test-standalone.mjs
+
+      - name: Validate safer-buffer imports from isolated directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" STANDALONE_IMPORT_TARGET="safer-buffer" NODE_PATH="" node scripts/test-standalone.mjs
+
+      - name: Validate Better Auth and Drizzle imports from isolated directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" STANDALONE_IMPORT_TARGET="better-auth" NODE_PATH="" node scripts/test-standalone.mjs
+          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" STANDALONE_IMPORT_TARGET="drizzle-orm/mysql2" NODE_PATH="" node scripts/test-standalone.mjs
+
+      - name: Validate Sharp imports from isolated directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" STANDALONE_IMPORT_TARGET="sharp" NODE_PATH="" node scripts/test-standalone.mjs
 
       - name: Package release artifact
         shell: bash
