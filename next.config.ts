@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       "./node_modules/long/**/*", "./node_modules/lru.min/**/*",
       "./node_modules/named-placeholders/**/*", "./node_modules/sql-escaper/**/*",
       "./node_modules/safer-buffer/**/*",
+      "./node_modules/sharp/**/*", "./node_modules/@img/**/*",
       "./node_modules/better-auth/**/*", "./node_modules/@better-auth/**/*",
       "./node_modules/@better-fetch/**/*", "./node_modules/@noble/**/*",
       "./node_modules/better-call/**/*", "./node_modules/defu/**/*",
