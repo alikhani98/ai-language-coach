@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       "./node_modules/named-placeholders/**/*", "./node_modules/sql-escaper/**/*",
       "./node_modules/safer-buffer/**/*",
       "./node_modules/sharp/**/*", "./node_modules/@img/**/*",
+      "./node_modules/@img/sharp-linux-x64/**/*",
+      "./node_modules/@img/sharp-libvips-linux-x64/**/*",
       "./node_modules/better-auth/**/*", "./node_modules/@better-auth/**/*",
       "./node_modules/@better-fetch/**/*", "./node_modules/@noble/**/*",
       "./node_modules/better-call/**/*", "./node_modules/defu/**/*",
