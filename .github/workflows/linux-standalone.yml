@@ -47,7 +47,7 @@ jobs:
           isolated="$(mktemp -d)"
           trap 'rm -rf "$isolated"' EXIT
           rm -rf .next/standalone/.next/cache
-          cp -a .next/standalone/. "$isolated/"
+          tar -C .next/standalone -cf - . | tar -C "$isolated" -xf -
           test -f "$isolated/server.js"
           test -d "$isolated/.next/static"
           test ! -d "$isolated/.next/cache"
