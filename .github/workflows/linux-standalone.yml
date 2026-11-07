@@ -1,0 +1,91 @@
+name: Linux standalone release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/zaban-user-ai-settings]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build standalone
+        run: npm run build
+
+      - name: Validate standalone in place
+        run: npm run test:standalone
+
+      - name: Validate standalone from isolated directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          isolated="$(mktemp -d)"
+          trap 'rm -rf "$isolated"' EXIT
+          cp -a .next/standalone/. "$isolated/"
+          test -f "$isolated/server.js"
+          test -d "$isolated/.next/static"
+          test ! -d "$isolated/.next/cache"
+          test ! -e "$isolated/.env"
+          test ! -e "$isolated/.env.local"
+          test ! -e "$isolated/.env.production"
+          STANDALONE_TEST_DIR="$isolated" NODE_PATH="" npm run test:standalone
+
+      - name: Package release artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          secret_file="$(find .next/standalone -type f \( -name '.env' -o -name '.env.*' -o -iname '*.pem' -o -iname '*.key' \) -print -quit)"
+          if [ -n "$secret_file" ]; then echo "Secret-like file found: $secret_file"; exit 1; fi
+          test ! -d .next/standalone/.next/cache
+          tar -C .next/standalone -czf dist/zaban-standalone-${GITHUB_SHA}.tar.gz .
+          sha256sum dist/zaban-standalone-${GITHUB_SHA}.tar.gz | tee dist/SHA256SUMS
+          du -h dist/zaban-standalone-${GITHUB_SHA}.tar.gz | tee dist/SIZE
+
+      - name: Publish build summary
+        shell: bash
+        run: |
+          {
+            echo '### Linux standalone artifact'
+            echo
+            echo '```text'
+            cat dist/SIZE
+            cat dist/SHA256SUMS
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload standalone artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zaban-standalone-${{ github.sha }}
+          path: |
+            dist/zaban-standalone-${{ github.sha }}.tar.gz
+            dist/SHA256SUMS
+            dist/SIZE
+          if-no-files-found: error
+          retention-days: 14

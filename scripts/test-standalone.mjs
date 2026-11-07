@@ -5,7 +5,9 @@ import { spawn } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 
-const standalone = path.join(process.cwd(), ".next", "standalone");
+const standalone = process.env.STANDALONE_TEST_DIR
+  ? path.resolve(process.env.STANDALONE_TEST_DIR)
+  : path.join(process.cwd(), ".next", "standalone");
 const server = path.join(standalone, "server.js");
 await access(server);
 const required = ["mysql2", "better-auth", "drizzle-orm", "zod", "next", "react", "react-dom"];
