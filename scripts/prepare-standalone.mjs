@@ -67,6 +67,21 @@ const requiredRuntimePackages = ["mysql2", "better-auth", "drizzle-orm", "zod", 
 // TypeScript is a build-time dependency that Next can trace through tooling;
 // Passenger never needs it to serve the compiled server.
 await rm(path.join(standalone, "node_modules", "typescript"), { recursive: true, force: true });
+const tracedRuntimePackages = [
+  "mysql2", "safer-buffer", "better-auth", "@better-auth", "@better-fetch", "@noble",
+  "@standard-schema", "better-call", "defu", "jose", "kysely", "nanostores", "rou3",
+  "set-cookie-parser", "drizzle-orm", "zod", "sharp", "@img/colour",
+  "@img/sharp-linux-x64", "@img/sharp-libvips-linux-x64",
+];
+for (const packageName of tracedRuntimePackages) {
+  const source = path.join(root, "node_modules", packageName);
+  const target = path.join(standalone, "node_modules", packageName);
+  try { await access(source); } catch { continue; }
+  try { await access(target); } catch {
+    await mkdir(path.dirname(target), { recursive: true });
+    await cp(source, target, { recursive: true, force: true });
+  }
+}
 const missing = requiredRuntimePackages.filter((name) => {
   try { require.resolve(name, { paths: [standalone] }); return false; } catch { return true; }
 });
