@@ -77,10 +77,12 @@ for (const packageName of tracedRuntimePackages) {
   const source = path.join(root, "node_modules", packageName);
   const target = path.join(standalone, "node_modules", packageName);
   try { await access(source); } catch { continue; }
-  try { await access(target); } catch {
-    await mkdir(path.dirname(target), { recursive: true });
-    await cp(source, target, { recursive: true, force: true });
-  }
+  // Next tracing can leave a package directory present but incomplete (for
+  // example mysql2's nested iconv-lite -> safer-buffer dependency). Merge the
+  // explicitly allow-listed runtime package instead of trusting directory
+  // existence as proof that all files were traced.
+  await mkdir(path.dirname(target), { recursive: true });
+  await cp(source, target, { recursive: true, force: true });
 }
 const missing = requiredRuntimePackages.filter((name) => {
   try { require.resolve(name, { paths: [standalone] }); return false; } catch { return true; }
