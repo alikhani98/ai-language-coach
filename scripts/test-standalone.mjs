@@ -22,7 +22,15 @@ if (leaked.length) throw new Error(`Potential secret files in artifact: ${leaked
 const port = 3187;
 const child = spawn(process.execPath, [server], {
   cwd: standalone,
-  env: { NODE_ENV: "production", PORT: String(port), HOSTNAME: "127.0.0.1", NODE_PATH: "" },
+  env: {
+    NODE_ENV: "production",
+    PORT: String(port),
+    HOSTNAME: "127.0.0.1",
+    NODE_PATH: "",
+    APP_URL: `http://127.0.0.1:${port}`,
+    NEXT_PUBLIC_SUPABASE_URL: "https://standalone-test.invalid",
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: "standalone-test-anon-key-not-a-secret",
+  },
   stdio: ["ignore", "pipe", "pipe"],
 });
 let output = "";
