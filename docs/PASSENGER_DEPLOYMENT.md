@@ -50,13 +50,20 @@ data written to MySQL while cutover was active.
    ```
 
 4. Confirm `.next/standalone/server.js`, `.next/standalone/.next/static`, and
-   `.next/standalone/node_modules` exist. `outputFileTracingRoot: process.cwd()`
-   is required so standalone tracing includes runtime dependencies before the
-   deployment copy step.
+   `.next/standalone/release-manifest.json` exist. The build explicitly traces
+   the guarded MySQL/Better Auth runtime packages; it does not copy all of
+   `node_modules` or build caches. Run `npm run test:standalone` after the build;
+   it starts the artifact with an empty `NODE_PATH` outside the source tree.
 5. Deploy the built release using the existing Passenger process and `app.js`.
    Do not edit `app.js` as part of ordinary release work.
 6. Restart the Node.js application from DirectAdmin, then verify login, logout,
    an active learner request, a non-admin denial, and an administrator request.
+
+The release artifact contains only the traced standalone runtime, `.next/static`,
+optional `public`, `server.js`, and its manifest. `.next/cache` is not copied.
+Build on a clean Linux/Node 22 host for the production-equivalent check; Windows
+may report `EPERM` while Next creates traced directories even when compilation
+and static generation succeed.
 
 ## OpenRouter smoke test
 
