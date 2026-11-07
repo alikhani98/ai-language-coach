@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getProfile } from "@/lib/actions/profile";
 import { getMessages } from "@/lib/i18n/config";
+import { AdminNav } from "@/components/admin/admin-nav";
 export default async function AdminLayout({
   children,
 }: {
@@ -15,22 +15,7 @@ export default async function AdminLayout({
         <h1 className="type-title">{m.title}</h1>
         <p className="text-muted-foreground">{m.description}</p>
       </header>
-      <nav aria-label={m.title} className="flex flex-wrap gap-2 border-b pb-4">
-        {[
-          ["/admin", m.overview],
-          ["/admin/users", m.users],
-          ["/admin/users?status=pending", m.pending],
-          ["/admin/audit", m.audit],
-        ].map(([href, label]) => (
-          <Link
-            key={href}
-            href={href}
-            className="inline-flex min-h-11 items-center rounded-lg bg-secondary px-4 text-sm font-medium hover:bg-accent"
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <AdminNav messages={getMessages((await getProfile())?.interface_language)} />
       {children}
     </div>
   );
