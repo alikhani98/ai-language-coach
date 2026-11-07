@@ -17,16 +17,24 @@ for (const name of required) {
   try { require.resolve(name, { paths: [standalone] }); }
   catch { throw new Error(`Isolated standalone cannot resolve ${name}.`); }
 }
-try {
-  const mysql = isolatedRequire("mysql2/promise");
-  if (typeof mysql.createPool !== "function") throw new Error("mysql2/promise has no createPool export");
-  isolatedRequire("safer-buffer");
-  isolatedRequire("drizzle-orm/mysql2");
-  await import(pathToFileURL(isolatedRequire.resolve("better-auth")).href);
-  isolatedRequire("sharp");
-  console.log("Isolated runtime imports passed: mysql2/promise, safer-buffer, Better Auth, Drizzle MySQL, Sharp.");
-} catch (error) {
-  throw new Error(`Isolated runtime import failed: ${error instanceof Error ? error.message : String(error)}`);
+const runtimeImports = [
+  ["mysql2/promise", () => {
+    const mysql = isolatedRequire("mysql2/promise");
+    if (typeof mysql.createPool !== "function") throw new Error("missing createPool export");
+  }],
+  ["safer-buffer", () => isolatedRequire("safer-buffer")],
+  ["drizzle-orm/mysql2", () => isolatedRequire("drizzle-orm/mysql2")],
+  ["better-auth", async () => import(pathToFileURL(isolatedRequire.resolve("better-auth")).href)],
+  ["sharp", () => isolatedRequire("sharp")],
+];
+for (const [name, load] of runtimeImports) {
+  try {
+    await load();
+    console.log(`Isolated runtime import passed: ${name}.`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Isolated runtime import failed for ${name}: ${message}`);
+  }
 }
 if (process.env.STANDALONE_IMPORT_ONLY === "1") {
   console.log("Isolated standalone import validation passed.");
