@@ -34,6 +34,9 @@ for (const [name, load] of runtimeImports) {
     console.log(`Isolated runtime import passed: ${name}.`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    if (process.env.GITHUB_ACTIONS === "true") {
+      console.error(`::error title=Standalone import ${name}::${message}`);
+    }
     throw new Error(`Isolated runtime import failed for ${name}: ${message}`);
   }
 }
