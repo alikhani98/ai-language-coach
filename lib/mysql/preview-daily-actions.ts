@@ -85,6 +85,7 @@ export async function finishMySqlPreviewDailyLesson() {
     return { lesson, error: m.actions.dailyNotReady };
   }
   try { await refreshLearningMemory(profile); } catch { /* optional derived cache */ }
+  const analysisProvider = await getUserAIProvider(profile.user_id, "analysis");
   revalidatePath("/dashboard");
   revalidatePath("/practice");
   revalidatePath("/progress");
@@ -96,6 +97,6 @@ export async function finishMySqlPreviewDailyLesson() {
       words: updated.words.map((item) => item.word),
       exchanges: 0,
       corrections: [],
-    }),
+    }, analysisProvider),
   };
 }
