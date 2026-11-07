@@ -2,6 +2,7 @@ import { access, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 
@@ -10,10 +11,22 @@ const standalone = process.env.STANDALONE_TEST_DIR
   : path.join(process.cwd(), ".next", "standalone");
 const server = path.join(standalone, "server.js");
 await access(server);
+const isolatedRequire = createRequire(path.join(standalone, "package.json"));
 const required = ["mysql2", "better-auth", "drizzle-orm", "zod", "next", "react", "react-dom"];
 for (const name of required) {
   try { require.resolve(name, { paths: [standalone] }); }
   catch { throw new Error(`Isolated standalone cannot resolve ${name}.`); }
+}
+try {
+  const mysql = isolatedRequire("mysql2/promise");
+  if (typeof mysql.createPool !== "function") throw new Error("mysql2/promise has no createPool export");
+  isolatedRequire("safer-buffer");
+  isolatedRequire("drizzle-orm/mysql2");
+  await import(pathToFileURL(isolatedRequire.resolve("better-auth")).href);
+  isolatedRequire("sharp");
+  console.log("Isolated runtime imports passed: mysql2/promise, safer-buffer, Better Auth, Drizzle MySQL, Sharp.");
+} catch (error) {
+  throw new Error(`Isolated runtime import failed: ${error instanceof Error ? error.message : String(error)}`);
 }
 const manifest = JSON.parse(await readFile(path.join(standalone, "release-manifest.json"), "utf8"));
 const leaked = manifest.files.filter(({ path: file }) => /(^|\/)(\.env(?:\.|$)|.*\.(?:pem|key)|.*credentials?\.(?:json|ya?ml|txt))$/i.test(file));
