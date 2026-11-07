@@ -40,22 +40,39 @@ jobs:
       - name: Validate standalone in place
         run: npm run test:standalone
 
-      - name: Validate standalone from isolated directory
+      - name: Prepare isolated standalone directory
         shell: bash
         run: |
           set -euo pipefail
-          isolated="$(mktemp -d)"
-          trap 'rm -rf "$isolated"' EXIT
+          isolated="$RUNNER_TEMP/zaban-standalone-$GITHUB_RUN_ID"
+          rm -rf "$isolated"
+          mkdir -p "$isolated"
+          echo "STANDALONE_ISOLATED_DIR=$isolated" >> "$GITHUB_ENV"
+
+      - name: Copy standalone to isolated directory
+        shell: bash
+        run: |
+          set -euo pipefail
           rm -rf .next/standalone/.next/cache
-          tar -C .next/standalone -cf - . | tar -C "$isolated" -xf -
-          test -f "$isolated/server.js"
-          test -d "$isolated/.next/static"
-          test ! -d "$isolated/.next/cache"
-          test ! -e "$isolated/.env"
-          test ! -e "$isolated/.env.local"
-          test ! -e "$isolated/.env.production"
-          test -f "$isolated/release-manifest.json"
-          STANDALONE_TEST_DIR="$isolated" STANDALONE_IMPORT_ONLY="1" NODE_PATH="" node scripts/test-standalone.mjs
+          tar -C .next/standalone -cf - . | tar -C "$STANDALONE_ISOLATED_DIR" -xf -
+
+      - name: Check isolated artifact boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$STANDALONE_ISOLATED_DIR/server.js"
+          test -d "$STANDALONE_ISOLATED_DIR/.next/static"
+          test ! -d "$STANDALONE_ISOLATED_DIR/.next/cache"
+          test ! -e "$STANDALONE_ISOLATED_DIR/.env"
+          test ! -e "$STANDALONE_ISOLATED_DIR/.env.local"
+          test ! -e "$STANDALONE_ISOLATED_DIR/.env.production"
+          test -f "$STANDALONE_ISOLATED_DIR/release-manifest.json"
+
+      - name: Validate imports from isolated directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          STANDALONE_TEST_DIR="$STANDALONE_ISOLATED_DIR" STANDALONE_IMPORT_ONLY="1" NODE_PATH="" node scripts/test-standalone.mjs
 
       - name: Package release artifact
         shell: bash
