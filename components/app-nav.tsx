@@ -79,7 +79,7 @@ export async function AppNav() {
                     />
                   </div>
                   {isMySqlPreviewEnabled() && isOnboardingComplete ? (
-                    <Link href="/settings/ai" className="flex min-h-11 items-center gap-2 border-t pt-3 text-sm font-medium text-primary">
+                    <Link href="/settings/ai" aria-label={messages.aiSettings.accountSettings} title={messages.aiSettings.accountSettings} className="flex min-h-11 items-center gap-2 rounded-lg border-t pt-3 text-sm font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                       <Sparkles className="h-4 w-4" />
                       {messages.aiSettings.title}
                     </Link>
