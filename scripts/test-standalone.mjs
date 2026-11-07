@@ -32,7 +32,7 @@ const manifest = JSON.parse(await readFile(path.join(standalone, "release-manife
 const leaked = manifest.files.filter(({ path: file }) => /(^|\/)(\.env(?:\.|$)|.*\.(?:pem|key)|.*credentials?\.(?:json|ya?ml|txt))$/i.test(file));
 if (leaked.length) throw new Error(`Potential secret files in artifact: ${leaked.map(({ path: file }) => file).join(", ")}`);
 
-const port = 3187;
+const port = Number(process.env.STANDALONE_TEST_PORT ?? 3187);
 const child = spawn(process.execPath, [server], {
   cwd: standalone,
   env: {
@@ -61,4 +61,8 @@ try {
   console.log(`Isolated standalone runtime passed: /login returned ${response.status}.`);
 } finally {
   child.kill("SIGTERM");
+  await new Promise((resolve) => {
+    const timeout = setTimeout(resolve, 2000);
+    child.once("exit", () => { clearTimeout(timeout); resolve(); });
+  });
 }
