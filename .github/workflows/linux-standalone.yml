@@ -46,6 +46,7 @@ jobs:
           set -euo pipefail
           isolated="$(mktemp -d)"
           trap 'rm -rf "$isolated"' EXIT
+          rm -rf .next/standalone/.next/cache
           cp -a .next/standalone/. "$isolated/"
           test -f "$isolated/server.js"
           test -d "$isolated/.next/static"
