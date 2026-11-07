@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       "./node_modules/better-auth/**/*", "./node_modules/@better-auth/**/*",
       "./node_modules/@better-fetch/**/*", "./node_modules/@noble/**/*",
       "./node_modules/better-call/**/*", "./node_modules/defu/**/*",
+      "./node_modules/@standard-schema/**/*", "./node_modules/rou3/**/*",
+      "./node_modules/set-cookie-parser/**/*",
       "./node_modules/jose/**/*", "./node_modules/kysely/**/*",
       "./node_modules/nanostores/**/*", "./node_modules/drizzle-orm/**/*",
       "./node_modules/zod/**/*",
