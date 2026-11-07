@@ -83,3 +83,35 @@ prove this model can produce application-valid JSON.
    alone does not remove newly-created Better Auth or learning records.
 4. Record the incident window and decide whether MySQL records created during
    it require a one-time reconciliation.
+## User AI settings (BYOK)
+
+The MySQL-only user AI settings feature is additive and remains inactive until
+the Better Auth/MySQL cutover is enabled. Before activation, generate a random
+32-byte master key outside the repository and DocumentRoot, for example:
+
+```bash
+openssl rand -hex 32
+```
+
+Set the result as `ZABAN_AI_ENCRYPTION_KEY` in the private Passenger
+environment/bootstrap used by `/home/jtphyqur/apps/zaban` (the same
+`zaban-production.env` loading path already used by the application). Never
+print it in deployment logs, commit it, or expose it as `NEXT_PUBLIC_*`.
+
+Review and apply migrations in order during a maintenance window:
+
+1. Review `drizzle/0002_medical_shinko_yamashiro.sql` against the target MySQL 8 schema.
+2. Back up the database and apply the migration with the operator's migration procedure.
+3. Set `ZABAN_AI_ENCRYPTION_KEY`, then smoke-test `/settings/ai` with two active users.
+4. Leave shared-key policy disabled unless an authenticated administrator explicitly enables it.
+
+Do not run migrations from the web process. If a migration fails, stop and restore
+the database backup or use a reviewed compensating migration; do not edit old
+foundation migrations or delete user data. Rotation requires a planned decrypt-
+and-reencrypt operation while the old key is available, followed by replacement
+of the private environment value. A missing or invalid key fails closed.
+
+The page fetches the OpenRouter model catalog server-side with a short cache.
+Model tests are explicit user actions and are not part of deployment smoke tests;
+live requests and API credits must remain opt-in. No production deployment is
+performed by this change.

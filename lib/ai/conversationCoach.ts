@@ -1,7 +1,7 @@
 import type { LearnerContext } from "@/lib/learner/context";
 import { buildCoachPrompt, conversationSchemaHint } from "@/lib/ai/prompts/conversation";
 import { coachRole } from "@/lib/ai/prompts/context";
-import { getAIProvider } from "@/lib/ai/provider";
+import { getAIProvider, type AIProvider } from "@/lib/ai/provider";
 import {
   conversationCoachResponseSchema,
   type ConversationCoachResponse,
@@ -27,8 +27,9 @@ export type ConversationCoachInput = {
 
 export async function getConversationCoachReply(
   input: ConversationCoachInput,
+  provider: AIProvider = getAIProvider(),
 ): Promise<ConversationCoachResponse> {
-  const rawResponse = await getAIProvider().generateConversationResponse({
+  const rawResponse = await provider.generateConversationResponse({
     temperature: 0.5,
     maxTokens: 650,
     schemaName: "conversation_coach_response",

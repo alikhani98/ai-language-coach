@@ -15,6 +15,13 @@
       "when": 1793878664441,
       "tag": "0001_equal_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794052889007,
+      "tag": "0002_medical_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

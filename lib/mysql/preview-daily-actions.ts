@@ -9,6 +9,7 @@ import { parseLessonContent } from "@/lib/daily/lesson";
 import { getMessages } from "@/lib/i18n/config";
 import { loadLearnerContext } from "@/lib/learner/load";
 import { refreshLearningMemory } from "@/lib/memory/load";
+import { getUserAIProvider } from "@/lib/ai/user-provider";
 import {
   claimMySqlDailyLesson,
   completeMySqlDailyLesson,
@@ -50,7 +51,7 @@ export async function generateMySqlPreviewDailyLesson() {
         previousMistakes: context.recentMistakes.map((item) => item.wrong_sentence),
         previousTopics: context.conversationHistory.map((item) => item.topic),
       },
-    }));
+    }, await getUserAIProvider(profile.user_id, "lesson")));
     await publishMySqlDailyLesson(profile.user_id, lesson.id, generated);
     const updated = await getMySqlDailyLesson(profile.user_id, date);
     if (updated?.generation_status !== "ready") {

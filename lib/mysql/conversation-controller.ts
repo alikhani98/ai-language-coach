@@ -17,6 +17,7 @@ import { conversationIdSchema, conversationMessageInputSchema } from "@/lib/vali
 import { formatMySqlUtcDateTime } from "@/lib/mysql/profile";
 import { appendMySqlConversationExchange, getMySqlConversationThread } from "@/lib/mysql/conversation";
 import { syncMySqlMessageCorrections } from "@/lib/mysql/mistakes";
+import { getUserAIProvider } from "@/lib/ai/user-provider";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const maxMessages = 60;
@@ -154,7 +155,7 @@ export async function sendMySqlPreviewMessage(formData: FormData) {
       topic: thread.conversation.topic,
       recentMessages: thread.messages.map((message) => ({ role: message.role, content: message.content })),
       userMessage: text,
-    });
+    }, await getUserAIProvider(profile.user_id, "conversation"));
     await appendMySqlConversationExchange(profile.user_id, {
       conversationId, requestId, text,
       reply: response.reply, corrections: response.corrections,
@@ -218,7 +219,7 @@ export async function endMySqlPreviewConversation(formData: FormData) {
       const summary = await generateProgressSummary(context, {
         activity: "conversation", words: [], exchanges: answered.length,
         corrections: answered.flatMap(x => x.corrections), focus: context.weakAreas[0],
-      });
+      }, await getUserAIProvider(profile.user_id, "analysis"));
       await getMySqlDatabase().update(conversations).set({ feedback: JSON.stringify(summary) })
         .where(and(eq(conversations.id, id), eq(conversations.userId, profile.user_id),
           eq(conversations.status, "ended")));

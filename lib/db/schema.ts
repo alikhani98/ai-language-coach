@@ -278,3 +278,28 @@ export const adminAuditLogs = mysqlTable(
     check("admin_audit_logs_metadata_size_check", sql`OCTET_LENGTH(${table.metadata}) <= 4096`),
   ],
 );
+
+export const userAiSettings = mysqlTable(
+  "user_ai_settings",
+  {
+    userId: uuid("user_id")
+      .primaryKey()
+      .references(() => appUsers.id, { onDelete: "cascade" }),
+    provider: mysqlEnum("provider", ["openrouter"]).notNull().default("openrouter"),
+    encryptedApiKey: text("encrypted_api_key").notNull(),
+    keyFingerprint: char("key_fingerprint", { length: 64 }).notNull(),
+    keyLast4: char("key_last4", { length: 4 }).notNull(),
+    lessonModel: varchar("lesson_model", { length: 191 }).notNull(),
+    conversationModel: varchar("conversation_model", { length: 191 }).notNull(),
+    analysisModel: varchar("analysis_model", { length: 191 }).notNull(),
+    sourcePreference: mysqlEnum("source_preference", ["user", "shared"]).notNull().default("user"),
+    updatedAt: datetime("updated_at", { mode: "string", fsp: 3 })
+      .notNull().default(sql`CURRENT_TIMESTAMP(3)`).$onUpdateFn(() => sql`CURRENT_TIMESTAMP(3)`),
+  },
+);
+
+export const aiSharedKeyPolicy = mysqlTable("ai_shared_key_policy", {
+  id: char("id", { length: 1 }).primaryKey(),
+  enabled: int("enabled").notNull().default(0),
+  updatedAt: datetime("updated_at", { mode: "string", fsp: 3 }).notNull().default(sql`CURRENT_TIMESTAMP(3)`),
+});

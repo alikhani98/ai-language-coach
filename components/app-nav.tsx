@@ -1,6 +1,6 @@
 import { isProfileComplete } from "@/lib/daily/lesson";
 import Link from "next/link";
-import { BookOpenText, LogOut, Settings2 } from "lucide-react";
+import { BookOpenText, LogOut, Settings2, Sparkles } from "lucide-react";
 import { logout } from "@/lib/actions/auth";
 import { MySqlPreviewLogout } from "@/components/mysql-preview-logout";
 import { isMySqlPreviewEnabled } from "@/lib/auth/backend-mode";
@@ -78,6 +78,12 @@ export async function AppNav() {
                       messages={messages}
                     />
                   </div>
+                  {isMySqlPreviewEnabled() && isOnboardingComplete ? (
+                    <Link href="/settings/ai" className="flex min-h-11 items-center gap-2 border-t pt-3 text-sm font-medium text-primary">
+                      <Sparkles className="h-4 w-4" />
+                      {messages.aiSettings.title}
+                    </Link>
+                  ) : null}
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground">
                       {messages.common.theme}
