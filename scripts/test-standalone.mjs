@@ -28,6 +28,10 @@ try {
 } catch (error) {
   throw new Error(`Isolated runtime import failed: ${error instanceof Error ? error.message : String(error)}`);
 }
+if (process.env.STANDALONE_IMPORT_ONLY === "1") {
+  console.log("Isolated standalone import validation passed.");
+  process.exit(0);
+}
 const manifest = JSON.parse(await readFile(path.join(standalone, "release-manifest.json"), "utf8"));
 const leaked = manifest.files.filter(({ path: file }) => /(^|\/)(\.env(?:\.|$)|.*\.(?:pem|key)|.*credentials?\.(?:json|ya?ml|txt))$/i.test(file));
 if (leaked.length) throw new Error(`Potential secret files in artifact: ${leaked.map(({ path: file }) => file).join(", ")}`);

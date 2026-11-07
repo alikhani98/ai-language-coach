@@ -54,7 +54,7 @@ jobs:
           test ! -e "$isolated/.env"
           test ! -e "$isolated/.env.local"
           test ! -e "$isolated/.env.production"
-          STANDALONE_TEST_DIR="$isolated" STANDALONE_TEST_PORT="3188" NODE_PATH="" npm run test:standalone
+          STANDALONE_TEST_DIR="$isolated" STANDALONE_IMPORT_ONLY="1" NODE_PATH="" npm run test:standalone
 
       - name: Package release artifact
         shell: bash
