@@ -22,6 +22,10 @@ const runtimeImports = [
     const mysql = isolatedRequire("mysql2/promise");
     if (typeof mysql.createPool !== "function") throw new Error("missing createPool export");
   }],
+  ["is-property", () => {
+    const isProperty = isolatedRequire("is-property");
+    if (typeof isProperty !== "function") throw new Error("missing function export");
+  }],
   ["safer-buffer", () => isolatedRequire("safer-buffer")],
   ["drizzle-orm/mysql2", () => isolatedRequire("drizzle-orm/mysql2")],
   ["better-auth", async () => import(pathToFileURL(isolatedRequire.resolve("better-auth")).href)],

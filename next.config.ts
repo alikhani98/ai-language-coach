@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
     "/*": [
       "./node_modules/mysql2/**/*", "./node_modules/aws-ssl-profiles/**/*",
       "./node_modules/generate-function/**/*", "./node_modules/iconv-lite/**/*",
+      "./node_modules/is-property/**/*",
       "./node_modules/long/**/*", "./node_modules/lru.min/**/*",
       "./node_modules/named-placeholders/**/*", "./node_modules/sql-escaper/**/*",
       "./node_modules/safer-buffer/**/*",

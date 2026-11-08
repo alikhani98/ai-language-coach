@@ -1,5 +1,5 @@
 
-import { cp, mkdir, access, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, access, readdir, rm, stat, writeFile, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -68,7 +68,8 @@ const requiredRuntimePackages = ["mysql2", "better-auth", "drizzle-orm", "zod", 
 // Passenger never needs it to serve the compiled server.
 await rm(path.join(standalone, "node_modules", "typescript"), { recursive: true, force: true });
 const tracedRuntimePackages = [
-  "mysql2", "safer-buffer", "better-auth", "@better-auth", "@better-fetch", "@noble",
+  "mysql2", "aws-ssl-profiles", "generate-function", "is-property", "iconv-lite", "safer-buffer",
+  "long", "lru.min", "named-placeholders", "sql-escaper", "better-auth", "@better-auth", "@better-fetch", "@noble",
   "@standard-schema", "better-call", "defu", "jose", "kysely", "nanostores", "rou3",
   "set-cookie-parser", "drizzle-orm", "zod", "sharp", "@img/colour",
   "@img/sharp-linux-x64", "@img/sharp-libvips-linux-x64",
@@ -78,7 +79,17 @@ for (const packageName of tracedRuntimePackages) {
   try {
     packageJson = require.resolve(`${packageName}/package.json`, { paths: [root] });
   } catch {
-    continue;
+    let entry;
+    try { entry = require.resolve(packageName, { paths: [root] }); } catch { continue; }
+    let directory = path.dirname(entry);
+    while (directory !== path.dirname(directory)) {
+      try {
+        const metadata = JSON.parse(await readFile(path.join(directory, "package.json"), "utf8"));
+        if (metadata.name === packageName) { packageJson = path.join(directory, "package.json"); break; }
+      } catch { /* keep walking */ }
+      directory = path.dirname(directory);
+    }
+    if (!packageJson) continue;
   }
   const source = path.dirname(packageJson);
   const target = path.join(standalone, "node_modules", packageName);
